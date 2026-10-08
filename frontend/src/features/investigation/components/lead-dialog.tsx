@@ -13,28 +13,42 @@ type LeadDialogProps = {
   lead: Lead;
   /** Where following the lead goes (the transaction or wallet it points at). */
   actionHref: Route;
+  /** Wait this long after arriving before the lead pops up (0 = immediately). */
+  delayMs?: number;
 };
+
+/** Every lead waits this long, so the player can take in the page first. */
+export const LEAD_DIALOG_DELAY_MS = 3000;
 
 /**
  * "New lead" modal. It pops up every time the player arrives on a page that
  * has a lead (product decision); "Later" or Escape just closes it.
  * Native <dialog>: focus is trapped inside and the page behind becomes inert.
  */
-export function LeadDialog({ lead, actionHref }: LeadDialogProps) {
+export function LeadDialog({ lead, actionHref, delayMs = LEAD_DIALOG_DELAY_MS }: LeadDialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    if (!dialog.open) dialog.showModal();
+    const open = () => {
+      if (!dialog.open) dialog.showModal();
+    };
+    // Optionally let the player take in the page before the lead interrupts.
+    let timer: number | undefined;
+    if (delayMs > 0) timer = window.setTimeout(open, delayMs);
+    else open();
     // Must close on cleanup: Next keeps the previous page mounted but hidden
     // (React <Activity>) after navigating, and a hidden *modal* dialog still
     // makes the whole document inert, so the next page couldn't be clicked.
     // Cleanup runs when the page is hidden; the effect re-runs (re-opening the
-    // lead) when it's shown again.
-    return () => dialog.close();
-  }, [lead.id]);
+    // lead) when it's shown again. Leaving before the delay cancels the pop-up.
+    return () => {
+      window.clearTimeout(timer);
+      dialog.close();
+    };
+  }, [lead.id, delayMs]);
 
   return (
     <dialog

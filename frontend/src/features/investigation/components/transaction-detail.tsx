@@ -7,9 +7,17 @@ import { formatSol } from "@/lib/solana/format";
 import { cn } from "@/lib/utils/cn";
 
 import type { Transaction, Workspace } from "../data";
-import { AddToEvidenceButton } from "./add-to-evidence-button";
+import { AddToEvidenceLink } from "./add-to-evidence-link";
 
 type Wallet = Workspace["trail"][number];
+
+/**
+ * Descriptive names read with "the" ("the Treasury Wallet"); letter names
+ * don't ("Wallet B").
+ */
+export function walletName(label: string) {
+  return /wallet$/i.test(label) ? `the ${label}` : label;
+}
 
 const STATUS_LABEL: Record<Transaction["status"], string> = {
   confirmed: "Confirmed",
@@ -76,6 +84,7 @@ type TransactionDetailProps = {
   walletHref: (walletId: string) => Route;
   /** "Trace the Funds": follow the money to the receiving wallet. */
   traceHref: Route;
+  evidenceHref: Route;
 };
 
 export function TransactionDetail({
@@ -84,6 +93,7 @@ export function TransactionDetail({
   to,
   walletHref,
   traceHref,
+  evidenceHref,
 }: TransactionDetailProps) {
   const amount = formatSol(transaction.amountLamports);
 
@@ -134,7 +144,7 @@ export function TransactionDetail({
       </div>
 
       <p className="mt-[38px] rounded-[10px] border border-white/[0.06] bg-[#050c2c]/90 px-5 py-[22px] text-sm">
-        {amount} SOL moved from the {from.label} to {to.label}.
+        {amount} SOL moved from {walletName(from.label)} to {walletName(to.label)}.
       </p>
 
       <section aria-labelledby="related-activity" className="mt-8">
@@ -161,7 +171,7 @@ export function TransactionDetail({
       </section>
 
       <div className="mt-[34px] flex flex-wrap gap-2.5">
-        <AddToEvidenceButton />
+        <AddToEvidenceLink href={evidenceHref} />
         <Link
           href={traceHref}
           className="flex h-9 items-center gap-2 rounded-lg border border-accent/70 bg-[#0d1640] px-4 text-xs font-semibold text-accent transition-colors hover:border-accent"

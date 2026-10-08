@@ -1,6 +1,32 @@
 import { describe, expect, it } from "vitest";
 
-import { getWorkspace, isSolved } from "./data";
+import {
+  findCaseWallet,
+  getTransaction,
+  getWalletDetail,
+  getWorkspace,
+  isSolved,
+  walletParams,
+} from "./data";
+
+describe("case data integrity", () => {
+  it("every wallet activity row opens a transaction that exists, between known wallets", async () => {
+    for (const { caseId, walletId } of walletParams) {
+      const [wallet, workspace] = await Promise.all([
+        getWalletDetail(caseId, walletId),
+        getWorkspace(caseId),
+      ]);
+      for (const entry of wallet!.activity) {
+        expect(entry.link.kind, `${walletId}/${entry.id}`).toBe("transaction");
+        const tx = await getTransaction(caseId, entry.link.id);
+        expect(tx, `${walletId}/${entry.id} -> ${entry.link.id}`).not.toBeNull();
+        expect(findCaseWallet(workspace!, tx!.fromWalletId)).toBeDefined();
+        expect(findCaseWallet(workspace!, tx!.toWalletId)).toBeDefined();
+        expect(tx!.amountLamports).toBe(entry.amountLamports);
+      }
+    }
+  });
+});
 
 describe("isSolved", () => {
   it("is true only when every objective is done", () => {

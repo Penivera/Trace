@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils/cn";
 import { formatLongDate } from "@/lib/utils/date";
 
 import type { Target, WalletActivity, WalletDetail as WalletDetailData } from "../data";
-import { AddToEvidenceButton } from "./add-to-evidence-button";
+import { AddToEvidenceLink } from "./add-to-evidence-link";
 
 function SectionLabel({
   id,
@@ -139,9 +139,16 @@ type WalletDetailProps = {
   receivedFrom: Neighbor;
   sentTo: Neighbor;
   targetHref: (target: Target) => Route;
+  evidenceHref: Route;
 };
 
-export function WalletDetail({ wallet, receivedFrom, sentTo, targetHref }: WalletDetailProps) {
+export function WalletDetail({
+  wallet,
+  receivedFrom,
+  sentTo,
+  targetHref,
+  evidenceHref,
+}: WalletDetailProps) {
   return (
     <article
       aria-labelledby="wallet-label"
@@ -162,7 +169,7 @@ export function WalletDetail({ wallet, receivedFrom, sentTo, targetHref }: Walle
           </p>
           <p className="mt-2.5 text-xs text-foreground/85">{wallet.description}</p>
         </div>
-        <AddToEvidenceButton className="h-[33px] text-[11px]" />
+        <AddToEvidenceLink href={evidenceHref} className="h-[33px] text-[11px]" />
       </header>
 
       <section aria-labelledby="wallet-overview" className="mt-[30px]">

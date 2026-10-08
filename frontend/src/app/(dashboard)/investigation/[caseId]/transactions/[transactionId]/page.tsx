@@ -9,7 +9,12 @@ import { caseRoutes } from "@/features/cases/routes";
 import { LeadDialog } from "@/features/investigation/components/lead-dialog";
 import { ProgressStrip } from "@/features/investigation/components/progress-strip";
 import { TransactionDetail } from "@/features/investigation/components/transaction-detail";
-import { getTransaction, getWorkspace, transactionParams } from "@/features/investigation/data";
+import {
+  findCaseWallet,
+  getTransaction,
+  getWorkspace,
+  transactionParams,
+} from "@/features/investigation/data";
 import { getSelectedInvestigator } from "@/features/investigators/selection";
 
 type Props = PageProps<"/investigation/[caseId]/transactions/[transactionId]">;
@@ -33,7 +38,7 @@ async function TransactionContent({ params }: Pick<Props, "params">) {
   ]);
   if (!transaction || !workspace) notFound();
 
-  const wallet = (id: string) => workspace.trail.find((w) => w.id === id);
+  const wallet = (id: string) => findCaseWallet(workspace, id);
   const from = wallet(transaction.fromWalletId);
   const to = wallet(transaction.toWalletId);
   if (!from || !to) notFound();
@@ -71,6 +76,7 @@ async function TransactionContent({ params }: Pick<Props, "params">) {
           to={to}
           walletHref={(id) => caseRoutes.wallet(caseId, id)}
           traceHref={caseRoutes.wallet(caseId, to.id)}
+          evidenceHref={caseRoutes.evidence(caseId)}
         />
       </div>
 

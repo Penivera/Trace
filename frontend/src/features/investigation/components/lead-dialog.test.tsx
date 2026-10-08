@@ -1,7 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Route } from "next";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { LeadDialog } from "./lead-dialog";
 
@@ -14,7 +14,7 @@ const lead = {
 };
 const href = "/investigation/case-001/wallets/wallet-b" as Route;
 
-const renderDialog = () => render(<LeadDialog lead={lead} actionHref={href} />);
+const renderDialog = () => render(<LeadDialog lead={lead} actionHref={href} delayMs={0} />);
 const dialog = () => screen.getByRole("dialog", { hidden: true }) as HTMLDialogElement;
 
 describe("LeadDialog", () => {
@@ -31,6 +31,24 @@ describe("LeadDialog", () => {
       "href",
       href,
     );
+  });
+
+  it("waits for the delay before popping up, and never opens if the page is left first", () => {
+    vi.useFakeTimers();
+    try {
+      const { unmount } = render(<LeadDialog lead={lead} actionHref={href} delayMs={3000} />);
+      expect(dialog().open).toBe(false);
+      act(() => vi.advanceTimersByTime(2999));
+      expect(dialog().open).toBe(false);
+      act(() => vi.advanceTimersByTime(1));
+      expect(dialog().open).toBe(true);
+
+      unmount();
+      render(<LeadDialog lead={lead} actionHref={href} delayMs={3000} />).unmount();
+      act(() => vi.advanceTimersByTime(5000)); // timer from the unmounted copy must not fire
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("closes when its page goes away, so it can't leave the next page inert", () => {

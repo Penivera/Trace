@@ -53,6 +53,8 @@ export const workspaceSchema = z.object({
   timeline: z.array(timelineEntrySchema),
   /** Wallets on the trail, in the order the funds moved. */
   trail: z.array(walletSummarySchema),
+  /** Wallets seen in the case that are not on the money trail (e.g. a fee/dust recipient). */
+  otherWallets: z.array(walletSummarySchema),
   evidenceCount: z.number().int().nonnegative(),
   lead: leadSchema.nullable(),
 });
@@ -134,6 +136,7 @@ const workspaces: Record<string, Workspace> = {
       { id: "wallet-d", label: "Wallet D", address: "6P9R ... 78ST" },
       { id: "exchange", label: "Exchange Wallet", address: "8T3W ... 90UV" },
     ],
+    otherWallets: [{ id: "unknown-1f5g", label: "Unknown wallet", address: "1F5g ... 44UU" }],
     evidenceCount: 0,
     lead: {
       id: "lead-time-window",
@@ -190,7 +193,12 @@ const transactionSchema = z.object({
 
 export type Transaction = z.infer<typeof transactionSchema>;
 
-/** MOCK transaction details by case, then timeline entry id (only the lead's transaction so far). */
+/** Any wallet known to the case, on the trail or not. */
+export function findCaseWallet(workspace: Pick<Workspace, "trail" | "otherWallets">, id: string) {
+  return [...workspace.trail, ...workspace.otherWallets].find((w) => w.id === id);
+}
+
+/** MOCK transaction details by case, then transaction id. Signatures are placeholders. */
 const transactions: Record<string, Record<string, Transaction>> = {
   "case-001": {
     "tx-3": {
@@ -209,6 +217,28 @@ const transactions: Record<string, Record<string, Transaction>> = {
         actionLabel: "Investigate wallet",
         target: { kind: "wallet", id: "wallet-b" },
       },
+    },
+    "tx-b-out": {
+      id: "tx-b-out",
+      signature: "3Gk2...Rw7M",
+      status: "confirmed",
+      time: "02:51:04 UTC",
+      amountLamports: 20 * SOL,
+      fromWalletId: "wallet-b",
+      toWalletId: "wallet-c",
+      progress: { completed: 1, total: 5 },
+      lead: null,
+    },
+    "tx-b-dust": {
+      id: "tx-b-dust",
+      signature: "8Nq4...Dz1X",
+      status: "confirmed",
+      time: "02:55:20 UTC",
+      amountLamports: 0.05 * SOL,
+      fromWalletId: "wallet-b",
+      toWalletId: "unknown-1f5g",
+      progress: { completed: 1, total: 5 },
+      lead: null,
     },
   },
 };
@@ -303,7 +333,7 @@ const wallets: Record<string, Record<string, WalletDetail>> = {
           counterparty: "1F5g...44UU",
           key: false,
           flagged: false,
-          link: { kind: "wallet", id: "1F5g...44UU" },
+          link: { kind: "transaction", id: "tx-b-dust" },
         },
       ],
     },

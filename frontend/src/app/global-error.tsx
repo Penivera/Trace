@@ -20,7 +20,7 @@ export default function GlobalError({
       >
         <title>Something went wrong · TRACE</title>
         <h2>Something went wrong</h2>
-        <button type="button" onClick={() => retry()}>
+        <button type="button" onClick={() => retry()} style={{ cursor: "pointer" }}>
           Try again
         </button>
       </body>

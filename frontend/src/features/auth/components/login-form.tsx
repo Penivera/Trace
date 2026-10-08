@@ -12,7 +12,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 
 import { login } from "../api";
 import { loginSchema } from "../schemas";
-import { FormAlert } from "./form-alert";
+import { FormAlert } from "@/components/ui/form-alert";
 import { SocialSignIn } from "./social-sign-in";
 
 export function LoginForm() {
@@ -66,7 +66,7 @@ export function LoginForm() {
       </Field>
 
       <div className="flex items-center justify-between gap-4 text-xs">
-        <label className="flex cursor-pointer items-center gap-2 text-foreground/90">
+        <label className="flex items-center gap-2 text-foreground/90">
           <input type="checkbox" className="size-4 accent-accent" {...register("remember")} />
           Remember me
         </label>

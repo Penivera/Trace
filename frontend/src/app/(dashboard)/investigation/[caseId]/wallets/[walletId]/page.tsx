@@ -64,6 +64,7 @@ async function WalletContent({ params }: Pick<Props, "params">) {
           receivedFrom={neighbor(wallet.receivedFromWalletId)}
           sentTo={neighbor(wallet.sentToWalletId)}
           targetHref={(target) => caseRoutes.target(caseId, target)}
+          evidenceHref={caseRoutes.evidence(caseId)}
         />
       </div>
     </div>

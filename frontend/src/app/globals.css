@@ -74,6 +74,31 @@
     @apply bg-background font-sans text-foreground;
   }
 
+  /*
+   * Pointer cursor on everything clickable. Links get it from the browser;
+   * Tailwind v4's preflight leaves buttons with the default arrow.
+   */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  select:not(:disabled),
+  summary,
+  input:is(
+      [type="checkbox"],
+      [type="radio"],
+      [type="submit"],
+      [type="button"],
+      [type="reset"],
+      [type="file"]
+    ):not(:disabled),
+  label:has(> input:is([type="checkbox"], [type="radio"]):not(:disabled)) {
+    cursor: pointer;
+  }
+
+  :disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
   }

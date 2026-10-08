@@ -10,7 +10,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 
 import { signup } from "../api";
 import { PASSWORD_MIN_LENGTH, signupSchema } from "../schemas";
-import { FormAlert } from "./form-alert";
+import { FormAlert } from "@/components/ui/form-alert";
 import { SocialSignIn } from "./social-sign-in";
 
 export function SignupForm() {
