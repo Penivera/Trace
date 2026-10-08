@@ -7,6 +7,8 @@ import { LeadDialog } from "./lead-dialog";
 
 const lead = {
   id: "lead-1",
+  badge: "New lead",
+  trigger: "arrival" as const,
   title: "This wallet received the missing funds.",
   message: "Check the transactions around {{02:40–03:00 UTC}}.",
   actionLabel: "Investigate wallet",
@@ -46,6 +48,27 @@ describe("LeadDialog", () => {
       unmount();
       render(<LeadDialog lead={lead} actionHref={href} delayMs={3000} />).unmount();
       act(() => vi.advanceTimersByTime(5000)); // timer from the unmounted copy must not fire
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("idle leads wait for inactivity: any interaction restarts the countdown", () => {
+    vi.useFakeTimers();
+    try {
+      const idleLead = { ...lead, badge: "Trace update", trigger: "idle" as const };
+      render(<LeadDialog lead={idleLead} actionHref={href} delayMs={6000} />);
+      expect(screen.getByText("Trace update")).toBeInTheDocument();
+
+      act(() => vi.advanceTimersByTime(5000));
+      act(() => {
+        window.dispatchEvent(new Event("pointerdown")); // player is doing something
+      });
+      act(() => vi.advanceTimersByTime(5000));
+      expect(dialog().open).toBe(false); // only 5s idle since the click
+
+      act(() => vi.advanceTimersByTime(1000));
+      expect(dialog().open).toBe(true);
     } finally {
       vi.useRealTimers();
     }
