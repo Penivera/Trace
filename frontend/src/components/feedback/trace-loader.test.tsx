@@ -13,10 +13,10 @@ describe("TraceLoader", () => {
     expect(status).toHaveTextContent("Loading…");
   });
 
-  it("keeps the decorative trail and rotating lines away from screen readers", () => {
-    render(<TraceLoader />);
+  it("keeps the decorative scanner and rotating lines away from screen readers", () => {
+    const { container } = render(<TraceLoader />);
 
-    expect(screen.getByText("Treasury").closest("[aria-hidden]")).not.toBeNull();
+    expect(container.querySelector("svg")?.closest("[aria-hidden]")).not.toBeNull();
     expect(screen.getByText("Following the money…").closest("[aria-hidden]")).not.toBeNull();
   });
 });
