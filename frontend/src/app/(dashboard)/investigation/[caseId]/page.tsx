@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { TraceLoader } from "@/components/feedback/trace-loader";
 import { buttonVariants } from "@/components/ui/button";
 import { getCurrentUser } from "@/features/auth/session";
 import { caseIds } from "@/features/cases/data";
@@ -155,7 +156,7 @@ async function WorkspaceContent({ params, searchParams }: Props) {
 
 export default function WorkspacePage(props: Props) {
   return (
-    <Suspense>
+    <Suspense fallback={<TraceLoader label="Opening the workspace" />}>
       <WorkspaceContent {...props} />
     </Suspense>
   );

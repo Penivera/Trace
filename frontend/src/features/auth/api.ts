@@ -1,19 +1,16 @@
-import type { LoginValues, SignupValues } from "./schemas";
+import type { SignupValues } from "./schemas";
 
 /**
- * Auth endpoints are not defined by the backend yet. These throw until they
- * are wired to `api.post(...)` with response schemas, so the forms surface a
- * clear message instead of pretending to succeed.
+ * Sign-up isn't defined by the backend yet. This throws until it is wired to
+ * `api.post(...)` with a response schema, so the form surfaces a clear message
+ * instead of pretending to succeed. (Login uses the demo-account Server Action
+ * in ./actions.ts for now.)
  */
 export class AuthNotConnectedError extends Error {
   override readonly name = "AuthNotConnectedError";
   constructor() {
-    super("Sign-in isn't connected yet. The backend endpoints are on the way.");
+    super("Sign-up isn't open yet. Ask the team for the demo login in the meantime.");
   }
-}
-
-export async function login(_values: LoginValues): Promise<never> {
-  throw new AuthNotConnectedError();
 }
 
 export async function signup(_values: SignupValues): Promise<never> {

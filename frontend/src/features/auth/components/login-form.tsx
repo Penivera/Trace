@@ -3,19 +3,22 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Route } from "next";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Field, fieldErrorId } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 
-import { login } from "../api";
+import { loginAction } from "../actions";
 import { loginSchema } from "../schemas";
 import { FormAlert } from "@/components/ui/form-alert";
-import { SocialSignIn } from "./social-sign-in";
+import { oauthProviderName, SocialSignIn } from "./social-sign-in";
 
 export function LoginForm() {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -30,11 +33,20 @@ export function LoginForm() {
 
   const onSubmit = handleSubmit(async (values) => {
     try {
-      await login(values);
-      // TODO: redirect once the session flow is defined with the backend.
-    } catch (error) {
+      // Where the Proxy was sending the player before login; validated on the server.
+      const next = new URLSearchParams(window.location.search).get("next");
+      const result = await loginAction(values, next);
+      if ("error" in result) {
+        setError("root", { message: result.error });
+        return;
+      }
+      toast.success(`Welcome back, ${result.displayName.split(" ")[0]}`, {
+        description: "Your case files are unlocked.",
+      });
+      router.replace(result.redirectTo);
+    } catch {
       setError("root", {
-        message: error instanceof Error ? error.message : "Something went wrong. Try again.",
+        message: "Couldn't reach the server. Check your connection and try again.",
       });
     }
   });
@@ -84,7 +96,12 @@ export function LoginForm() {
 
       <SocialSignIn
         label="Continue with"
-        onUnavailable={(message) => setError("root", { message })}
+        // TODO: start the OAuth redirect once the backend exposes it.
+        onContinue={(provider) =>
+          toast.info(`${oauthProviderName[provider]} sign-in is coming soon`, {
+            description: "Use the demo login from your team for now.",
+          })
+        }
       />
     </form>
   );

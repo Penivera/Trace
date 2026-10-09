@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { DashboardSidebar, DashboardTabs } from "@/components/layout/dashboard-nav";
 import { GameBackdrop } from "@/components/layout/game-backdrop";
@@ -19,8 +20,21 @@ import { getDashboardSummary } from "@/features/dashboard/data";
  *   `overflow-clip` (not `overflow-hidden`, which would make the root a scroll
  *   container and break the sticky header and rail).
  */
+/** The signed-in player's chip. getCurrentUser() also enforces the session. */
+async function HeaderUser() {
+  const user = await getCurrentUser();
+  return <UserMenu displayName={user.displayName} avatar={user.avatar} />;
+}
+
+/** Same footprint as the chip, so the header doesn't shift when it streams in. */
+function UserMenuPlaceholder() {
+  return (
+    <div aria-hidden className="h-[50.2px] w-[202px] rounded-[7.56px] border border-white/10" />
+  );
+}
+
 export default async function DashboardLayout({ children }: LayoutProps<"/">) {
-  const [user, progress] = await Promise.all([getCurrentUser(), getDashboardSummary()]);
+  const progress = await getDashboardSummary();
 
   return (
     <div className="design-canvas relative isolate flex min-h-svh flex-1 flex-col overflow-clip">
@@ -51,7 +65,10 @@ export default async function DashboardLayout({ children }: LayoutProps<"/">) {
         >
           {siteConfig.name}
         </Link>
-        <UserMenu displayName={user.displayName} avatar={user.avatar} />
+        {/* Reads the session cookie: streamed in its own boundary so the shell isn't held up. */}
+        <Suspense fallback={<UserMenuPlaceholder />}>
+          <HeaderUser />
+        </Suspense>
       </header>
 
       {/* Bottom space lives on <main>, not here: the sticky rail can't move

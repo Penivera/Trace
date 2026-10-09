@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Roboto } from "next/font/google";
 
+import { BootSplash, bootSplashScript } from "@/components/feedback/boot-splash";
 import { siteConfig } from "@/config/site";
 
 import { Providers } from "./providers";
@@ -52,7 +53,7 @@ const viewportWidthScript = `(function(){var r=document.documentElement;function
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // suppressHydrationWarning: the script above sets a style on <html> before React hydrates.
+    // suppressHydrationWarning: the head scripts set a style and a class on <html> before React hydrates.
     <html
       lang="en"
       suppressHydrationWarning
@@ -60,8 +61,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: viewportWidthScript }} />
+        <script dangerouslySetInnerHTML={{ __html: bootSplashScript }} />
       </head>
       <body className="flex min-h-full flex-col">
+        <BootSplash />
         <Providers>{children}</Providers>
       </body>
     </html>

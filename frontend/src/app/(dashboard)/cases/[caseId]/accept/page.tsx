@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { TraceLoader } from "@/components/feedback/trace-loader";
 import { getCurrentUser } from "@/features/auth/session";
 import { CaseOffer } from "@/features/cases/components/case-offer";
 import { caseIds, getCaseBrief } from "@/features/cases/data";
@@ -48,7 +49,7 @@ async function CaseOfferContent({ params }: Pick<Props, "params">) {
 
 export default function CaseOfferPage(props: Props) {
   return (
-    <Suspense>
+    <Suspense fallback={<TraceLoader label="Preparing your case" />}>
       <CaseOfferContent {...props} />
     </Suspense>
   );

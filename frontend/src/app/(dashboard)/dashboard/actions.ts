@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { caseIds } from "@/features/cases/data";
+import { setFlash } from "@/features/flash/server";
 import { caseRoutes } from "@/features/cases/routes";
 import { getInvestigator } from "@/features/investigators/data";
 import {
@@ -29,6 +30,7 @@ export async function selectInvestigator(formData: FormData) {
     investigator.id,
     selectedInvestigatorCookieOptions,
   );
+  await setFlash("investigator-selected");
 
   if (typeof caseId === "string" && caseIds.includes(caseId)) {
     redirect(caseRoutes.briefing(caseId));

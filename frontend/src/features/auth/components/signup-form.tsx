@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Field, fieldErrorId } from "@/components/ui/field";
@@ -11,7 +12,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { signup } from "../api";
 import { PASSWORD_MIN_LENGTH, signupSchema } from "../schemas";
 import { FormAlert } from "@/components/ui/form-alert";
-import { SocialSignIn } from "./social-sign-in";
+import { oauthProviderName, SocialSignIn } from "./social-sign-in";
 
 export function SignupForm() {
   const {
@@ -93,7 +94,12 @@ export function SignupForm() {
 
       <SocialSignIn
         label="Sign up with"
-        onUnavailable={(message) => setError("root", { message })}
+        // TODO: start the OAuth redirect once the backend exposes it.
+        onContinue={(provider) =>
+          toast.info(`${oauthProviderName[provider]} sign-in is coming soon`, {
+            description: "Use the demo login from your team for now.",
+          })
+        }
       />
     </form>
   );

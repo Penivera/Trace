@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { TraceLoader } from "@/components/feedback/trace-loader";
 import { caseRoutes } from "@/features/cases/routes";
 import { LeadDialog } from "@/features/investigation/components/lead-dialog";
 import { ProgressStrip } from "@/features/investigation/components/progress-strip";
@@ -92,7 +93,7 @@ async function TransactionContent({ params }: Pick<Props, "params">) {
 
 export default function TransactionPage(props: Props) {
   return (
-    <Suspense>
+    <Suspense fallback={<TraceLoader label="Reading the transaction" />}>
       <TransactionContent {...props} />
     </Suspense>
   );
