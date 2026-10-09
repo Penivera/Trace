@@ -10,23 +10,23 @@ export function CaseProgress({ objectives }: { objectives: Workspace["objectives
   const percent = objectives.length ? Math.round((done / objectives.length) * 100) : 0;
 
   return (
-    <Panel aria-labelledby="case-progress" className="px-[18px] pt-[22px] pb-5">
+    <Panel aria-labelledby="case-progress" className="flex flex-col gap-4 p-[21px]">
       <PanelLabel id="case-progress" icon={ClipboardList}>
         Case progress
       </PanelLabel>
 
-      <ol className="mt-3.5 flex flex-col gap-[11px]">
+      <ol className="flex flex-col gap-4 pb-2 font-roboto">
         {objectives.map((objective, i) => (
-          <li key={i} className="flex items-start gap-2.5 text-[11px] leading-[15px]">
+          <li key={i} className="flex items-start gap-3 text-[13px] leading-[17.88px]">
             <span
               className={cn(
-                "mt-px grid size-[13px] shrink-0 place-items-center rounded-full border",
-                objective.done ? "border-accent" : "border-white/30",
+                "mt-0.5 size-4 shrink-0 rounded-full border",
+                objective.done ? "border-accent bg-accent/20" : "border-white/20",
               )}
             >
               <span className="sr-only">{objective.done ? "Done:" : "To do:"}</span>
             </span>
-            <span className={objective.done ? "text-accent" : "text-foreground/90"}>
+            <span className={objective.done ? "text-accent" : "text-[#cbd5e1]"}>
               {i + 1}. {objective.text}
             </span>
           </li>
@@ -39,11 +39,11 @@ export function CaseProgress({ objectives }: { objectives: Workspace["objectives
         aria-valuenow={percent}
         aria-valuemin={0}
         aria-valuemax={100}
-        className="mt-[22px] h-1 overflow-hidden rounded-full bg-[#050c26]"
+        className="h-1.5 overflow-hidden rounded-full border border-white/5 bg-[rgb(0_6_20/0.8)]"
       >
         {/* Minimum width keeps a visible start marker at 0%, as in the design. */}
         <div
-          className="h-full min-w-1.5 rounded-full bg-accent shadow-[0_0_6px_var(--accent)]"
+          className="h-full min-w-[11px] rounded-full bg-linear-to-r from-accent to-[#fcd34d] shadow-[0_0_8px_rgb(252_163_17/0.7)]"
           style={{ width: `${percent}%` }}
         />
       </div>

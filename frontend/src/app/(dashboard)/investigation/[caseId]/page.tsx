@@ -16,6 +16,7 @@ import { LeadDialog } from "@/features/investigation/components/lead-dialog";
 import { EvidenceSummary, TrailStatus } from "@/features/investigation/components/trail-status";
 import { WalletOverview } from "@/features/investigation/components/wallet-overview";
 import { getWorkspace, isSolved } from "@/features/investigation/data";
+import type { Investigator } from "@/features/investigators/data";
 import { getSelectedInvestigator } from "@/features/investigators/selection";
 
 type Props = PageProps<"/investigation/[caseId]">;
@@ -27,6 +28,39 @@ export function generateStaticParams() {
 export const metadata: Metadata = {
   title: "Investigation workspace",
 };
+
+/**
+ * Head-and-shoulders of the investigator above the left column (Figma:
+ * 166.68×243.36, mirrored; placed relative to <main>). Offsets fit the full-length art;
+ * half-body art falls back to a top-aligned fit.
+ */
+function WorkspacePortrait({ investigator }: { investigator: Investigator }) {
+  const art = investigator.fullBody;
+  return (
+    <div className="pointer-events-none absolute! top-[-48px] left-[14.87px] hidden h-[243.36px] w-[166.68px] -scale-x-100 overflow-hidden select-none lg:block">
+      {art ? (
+        <Image
+          src={art.src}
+          alt={investigator.description}
+          width={art.width}
+          height={art.height}
+          sizes="211px"
+          loading="eager"
+          className="absolute top-[-10.7px] left-[-39.7px] h-auto w-[210.5px] max-w-none"
+        />
+      ) : (
+        <Image
+          src={investigator.image.src}
+          alt={investigator.description}
+          fill
+          sizes="167px"
+          loading="eager"
+          className="object-contain object-top"
+        />
+      )}
+    </div>
+  );
+}
 
 async function WorkspaceContent({ params, searchParams }: Props) {
   const [{ caseId }, query, investigator, user] = await Promise.all([
@@ -45,24 +79,13 @@ async function WorkspaceContent({ params, searchParams }: Props) {
   const walletHref = (walletId: string) => caseRoutes.wallet(caseId, walletId);
 
   return (
-    <div className="grid gap-6 xl:ml-[3px] xl:grid-cols-[238px_minmax(0,496px)_238px] xl:gap-[27px]">
+    // Columns 286/596/286 wide, 27px inside <main>; panels start 151px down.
+    <div className="grid gap-6 lg:ml-[27px] lg:grid-cols-[286px_596px_286px] lg:gap-x-8">
+      <WorkspacePortrait investigator={investigator} />
+
       {/* Left: who is investigating and how far along they are. */}
-      <div className="flex flex-col gap-[29px] xl:order-1">
-        <div className="relative hidden h-[126px] xl:block">
-          {/* Bust overflows downward; the progress panel covers the lower body. */}
-          <Image
-            src={investigator.image.src}
-            alt={investigator.description}
-            width={investigator.image.width}
-            height={investigator.image.height}
-            sizes="140px"
-            loading="eager"
-            className="absolute bottom-[-64px] left-[-10px] h-[205px] w-auto max-w-none"
-          />
-        </div>
-        <div className="relative z-10">
-          <CaseProgress objectives={workspace.objectives} />
-        </div>
+      <div className="flex flex-col gap-5 lg:order-1 lg:pt-[151px]">
+        <CaseProgress objectives={workspace.objectives} />
         <InvestigatorStatus
           {...workspace.investigator}
           hint={workspace.hint}
@@ -72,14 +95,16 @@ async function WorkspaceContent({ params, searchParams }: Props) {
       </div>
 
       {/* Centre: the wallet under investigation and its activity. */}
-      <div className="order-first flex flex-col xl:order-2 xl:pt-[13px]">
-        <p className="font-display text-xl font-black tracking-tight text-accent uppercase italic">
-          {workspace.caseNumber} — {workspace.codename}
-        </p>
-        <h1 className="mt-[18px] font-display text-[clamp(1.5rem,2.1vw,1.875rem)] leading-none font-black tracking-tight uppercase">
-          Investigation workspace
-        </h1>
-        <div className="mt-[37px] flex flex-col gap-5">
+      <div className="order-first flex flex-col lg:order-2 lg:pt-[10px]">
+        <div className="flex flex-col gap-1 leading-[1.62] lg:w-[672px]">
+          <p className="font-roboto text-[20px] font-bold text-accent uppercase italic lg:text-[24px]">
+            {workspace.caseNumber} — {workspace.codename}
+          </p>
+          <h1 className="font-display text-[28px] font-black uppercase lg:text-[36px]">
+            Investigation workspace
+          </h1>
+        </div>
+        <div className="mt-6 flex flex-col gap-6 lg:mt-[39.8px]">
           <WalletOverview
             wallet={workspace.investigating}
             walletHref={walletHref(workspace.investigating.id)}
@@ -88,7 +113,8 @@ async function WorkspaceContent({ params, searchParams }: Props) {
             <Link
               href={caseRoutes.outcome(caseId)}
               className={buttonVariants({
-                className: "h-[49px] w-full font-display text-[13px] font-black",
+                className:
+                  "h-auto w-full rounded-[16px] py-3.5 font-display text-[16px] leading-6 font-black",
               })}
             >
               See trace outcome
@@ -104,7 +130,7 @@ async function WorkspaceContent({ params, searchParams }: Props) {
       </div>
 
       {/* Right: where the money has been, and what you've pinned. */}
-      <div className="flex flex-col gap-[21px] xl:order-3 xl:pt-[126px]">
+      <div className="flex flex-col gap-5 lg:order-3 lg:pt-[151px]">
         <TrailStatus
           trail={workspace.trail}
           currentWalletId={workspace.investigating.id}

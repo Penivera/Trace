@@ -1,18 +1,34 @@
-import { ArrowRight } from "lucide-react";
 import type { Route } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { buttonVariants } from "@/components/ui/button";
 import { renderHighlights } from "@/lib/text/highlight";
 
 import type { CaseBrief } from "../data";
 
-function SectionHeading({ children }: { children: ReactNode }) {
+/*
+ * Case briefing (Figma: Desktop - 5). Desktop offsets are relative to <main>
+ * (Figma x=396, y=153): title at x=452/y=225, brief and
+ * objectives columns at y=411 (x=452 and x=1127), Proceed at y=880.
+ */
+
+function SectionHeading({
+  id,
+  underline,
+  children,
+}: {
+  id: string;
+  underline: number;
+  children: ReactNode;
+}) {
   return (
-    <h2 className="inline-block border-b-2 border-accent pb-1.5 font-display text-base font-black tracking-tight uppercase">
-      {children}
-    </h2>
+    <div className="flex flex-col items-start gap-1">
+      <h2 id={id} className="font-display text-[20px] leading-[1.62] font-black uppercase">
+        {children}
+      </h2>
+      <span aria-hidden className="h-[3px] bg-accent" style={{ width: underline }} />
+    </div>
   );
 }
 
@@ -21,13 +37,13 @@ const bone = "rounded-md bg-white/10 motion-safe:animate-pulse";
 /** Placeholder with the briefing's proportions while the case loads. */
 export function CaseBriefingSkeleton() {
   return (
-    <div aria-busy="true" aria-label="Loading case" className="lg:pt-[75px] lg:pl-[22px]">
-      <div className={`${bone} h-[30px] w-40`} />
-      <div className={`${bone} mt-[26px] h-[30px] w-full max-w-[405px]`} />
-      <div className="mt-[60px] flex max-w-[405px] flex-col gap-4">
-        <div className={`${bone} h-5 w-28`} />
+    <div aria-busy="true" aria-label="Loading case" className="lg:pt-[72px] lg:pl-[56px]">
+      <div className={`${bone} h-[52px] w-56`} />
+      <div className={`${bone} mt-3 h-[52px] w-full max-w-[600px]`} />
+      <div className="mt-[56px] flex max-w-[490px] flex-col gap-4">
+        <div className={`${bone} h-8 w-32`} />
         {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className={`${bone} h-4`} style={{ width: `${90 - i * 7}%` }} />
+          <div key={i} className={`${bone} h-5`} style={{ width: `${90 - i * 7}%` }} />
         ))}
       </div>
     </div>
@@ -36,56 +52,53 @@ export function CaseBriefingSkeleton() {
 
 type CaseBriefingProps = {
   caseBrief: CaseBrief;
-  /** Shown beside the objectives, e.g. the player's chosen investigator. */
-  companion?: ReactNode;
   /** Next step after reading the brief (the case offer). */
   proceedHref: Route;
 };
 
-export function CaseBriefing({ caseBrief, companion, proceedHref }: CaseBriefingProps) {
+export function CaseBriefing({ caseBrief, proceedHref }: CaseBriefingProps) {
   return (
-    <article className="lg:pt-[75px] lg:pl-[22px]">
-      <header>
-        <p className="font-display text-[30px] leading-none font-black tracking-tight text-accent uppercase">
-          {caseBrief.number}
-        </p>
-        <h1 className="mt-[26px] font-display text-[clamp(1.5rem,2.1vw,1.875rem)] leading-none font-black tracking-tight uppercase">
-          {caseBrief.title}
-        </h1>
+    <article className="lg:pt-[72px] lg:pl-[56px]">
+      <header className="font-display text-[28px] leading-[1.62] font-black uppercase lg:text-[40px]">
+        <p className="text-accent">{caseBrief.number}</p>
+        <h1>{caseBrief.title}</h1>
       </header>
 
-      <div className="mt-[60px] grid gap-12 xl:grid-cols-[minmax(0,405px)_minmax(0,1fr)] xl:gap-x-[157px]">
-        <section aria-labelledby="case-brief">
-          <SectionHeading>
-            <span id="case-brief">Case brief</span>
+      <div className="mt-10 flex flex-col gap-12 lg:mt-[56.4px] lg:flex-row lg:gap-[185px]">
+        <section aria-labelledby="case-brief" className="lg:w-[490px]">
+          <SectionHeading id="case-brief" underline={127.5}>
+            Case brief
           </SectionHeading>
-          <div className="mt-3 text-[15px] leading-8 text-foreground/95 lg:leading-[35px]">
+          <div className="mt-5 font-roboto text-[17px] leading-[2.03] lg:text-[20px]">
             {caseBrief.brief.map((paragraph, i) => (
               <p key={i}>{renderHighlights(paragraph)}</p>
             ))}
           </div>
           <Link
             href={proceedHref}
-            className={buttonVariants({
-              className:
-                "mt-[38px] h-[59px] w-full max-w-[320px] font-display text-base font-black",
-            })}
+            className="mt-[45px] flex h-[71px] w-full max-w-[383px] items-center justify-center gap-2.5 rounded-[32px] bg-accent p-2.5 font-display text-[20px] leading-[1.62] font-black text-[#020512] uppercase transition-[filter] hover:brightness-110"
           >
             Proceed
-            <ArrowRight className="size-4" strokeWidth={2.25} />
+            <Image
+              src="/icons/arrow-line.svg"
+              alt=""
+              width={24}
+              height={24}
+              className="size-6 -scale-y-100 -rotate-90"
+            />
           </Link>
         </section>
 
-        <section aria-labelledby="case-objectives" className="relative">
-          <SectionHeading>
-            <span id="case-objectives">Case objectives</span>
+        <section aria-labelledby="case-objectives" className="lg:w-[401px]">
+          <SectionHeading id="case-objectives" underline={226}>
+            Case objectives
           </SectionHeading>
-          <ol className="mt-[18px] flex max-w-[372px] flex-col gap-[17px]">
+          <ol className="mt-5 font-roboto">
             {caseBrief.objectives.map((objective, i) => (
-              <li key={i} className="flex items-start gap-3 text-[10px] leading-[18px]">
+              <li key={i} className="flex h-[40.56px] items-center gap-[11px] text-[12px]">
                 <span
                   aria-hidden
-                  className="mt-0.5 grid size-[14px] shrink-0 place-items-center rounded-full bg-accent text-[8px] font-bold text-accent-foreground"
+                  className="grid size-[17px] shrink-0 place-items-center rounded-full bg-accent font-display text-[10px] font-bold text-black"
                 >
                   {i + 1}
                 </span>
@@ -93,11 +106,6 @@ export function CaseBriefing({ caseBrief, companion, proceedHref }: CaseBriefing
               </li>
             ))}
           </ol>
-          {companion && (
-            <div className="pointer-events-none absolute top-0 left-[311px] hidden xl:block">
-              {companion}
-            </div>
-          )}
         </section>
       </div>
     </article>

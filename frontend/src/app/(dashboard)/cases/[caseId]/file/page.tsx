@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -25,14 +26,28 @@ async function CaseFileContent({ params }: Pick<Props, "params">) {
   if (!caseFile) notFound();
 
   return (
-    <div className="relative max-w-[644px] lg:mt-3 lg:ml-[26px]">
+    // Card at canvas x=450, y=163; the figure and floor shadows are placed against it.
+    <div className="relative lg:mt-[10px] lg:ml-[54px] lg:w-[775px]">
       <CaseFile caseFile={caseFile} beginHref={caseRoutes.workspace(caseId)} />
-      {/* Stands just off the card's right edge, overlapping it slightly as in the design. */}
       <InvestigatorStanding
         investigator={investigator}
-        sizes="328px"
-        className="absolute top-0 left-[520px] hidden h-[783px] w-[328px] xl:block"
+        sizes="384px"
+        className="absolute top-[32.6px] left-[622px] hidden h-[915.2px] w-[383.7px] lg:block"
       />
+      {[
+        { top: 704.5, left: 663.7 },
+        { top: 726.5, left: 767.6 },
+      ].map(({ top, left }) => (
+        <Image
+          key={left}
+          src="/effects/floor-shadow-c.svg"
+          alt=""
+          width={304}
+          height={246}
+          className="pointer-events-none absolute hidden h-[245.77px] w-[303.58px] max-w-none lg:block"
+          style={{ top, left }}
+        />
+      ))}
     </div>
   );
 }

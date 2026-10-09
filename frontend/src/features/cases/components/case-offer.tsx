@@ -1,8 +1,6 @@
-import { Play, X } from "lucide-react";
 import type { Route } from "next";
+import Image from "next/image";
 import Link from "next/link";
-
-import { buttonVariants } from "@/components/ui/button";
 
 type CaseOfferProps = {
   agentName: string;
@@ -11,43 +9,28 @@ type CaseOfferProps = {
   acceptHref: Route;
 };
 
-const iconTile = "grid size-[22px] place-items-center rounded-[5px] bg-background";
-const action = "h-[59px] gap-2.5 px-6 font-display text-[15px] font-black tracking-normal";
+const action =
+  "flex h-[71px] w-full items-center justify-center gap-2.5 rounded-[32px] p-2.5 font-display text-[18px] leading-[1.62] font-black whitespace-nowrap text-[#020512] uppercase transition-[filter] hover:brightness-110 lg:text-[20px]";
 
-/** "Agent X, will you take this case?" Accept or reject before the investigation starts. */
+/**
+ * "Agent X, will you take this case?" (Figma: Desktop - 6). The block sits at
+ * canvas x=483, y=320, i.e. 87/167px inside <main>.
+ */
 export function CaseOffer({ agentName, caseTitle, rejectHref, acceptHref }: CaseOfferProps) {
   return (
-    <section aria-labelledby="case-offer-title" className="lg:pt-[159px] lg:pl-[53px]">
-      <p className="font-display text-[28px] leading-none font-black tracking-tight text-accent uppercase">
-        Agent {agentName}
-      </p>
-      <h1
-        id="case-offer-title"
-        className="mt-6 font-display text-[clamp(1.5rem,2vw,1.75rem)] leading-none font-black tracking-tight uppercase lg:mt-[48px]"
-      >
-        {caseTitle}
-      </h1>
+    <section aria-labelledby="case-offer-title" className="lg:pt-[167px] lg:pl-[87px]">
+      <div className="flex flex-col gap-6 font-display text-[28px] leading-[1.62] font-black uppercase lg:w-[597px] lg:text-[40px]">
+        <p className="text-accent">Agent {agentName}</p>
+        <h1 id="case-offer-title">{caseTitle}</h1>
+      </div>
 
-      <div className="mt-10 flex flex-wrap gap-4 sm:gap-5 lg:mt-[73px]">
-        <Link
-          href={rejectHref}
-          className={buttonVariants({
-            variant: "light",
-            className: `${action} w-full uppercase sm:w-[227px]`,
-          })}
-        >
-          <span className={iconTile}>
-            <X className="size-3.5 text-white" strokeWidth={3} />
-          </span>
+      <div className="mt-10 flex flex-col gap-6 sm:flex-row lg:mt-[76px]">
+        <Link href={rejectHref} className={`${action} bg-white sm:w-[273px]`}>
+          <Image src="/icons/reject.svg" alt="" width={28} height={28} className="size-[28.1px]" />
           Reject trace
         </Link>
-        <Link
-          href={acceptHref}
-          className={buttonVariants({ className: `${action} w-full sm:w-[280px]` })}
-        >
-          <span className={iconTile}>
-            <Play className="size-3 translate-x-px fill-accent text-accent" />
-          </span>
+        <Link href={acceptHref} className={`${action} bg-accent sm:w-[335px]`}>
+          <Image src="/icons/play.svg" alt="" width={24} height={24} className="size-6" />
           Accept and play
         </Link>
       </div>

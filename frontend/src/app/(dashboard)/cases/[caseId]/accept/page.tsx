@@ -37,10 +37,10 @@ async function CaseOfferContent({ params }: Pick<Props, "params">) {
         // TODO: record acceptance with the backend before opening the case file.
         acceptHref={caseRoutes.file(caseId)}
       />
-      {/* Positioned against the dashboard layout root, top-right under the beam. */}
+      {/* Relative to <main>; the beam rises up behind the header. */}
       <SpotlightInvestigator
         investigator={investigator}
-        className="absolute top-0 right-0 z-30 hidden xl:block"
+        className="absolute! top-[-153px] left-[870px] hidden lg:block"
       />
     </>
   );

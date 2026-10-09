@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils/cn";
 
 type UserMenuProps = {
   displayName: string;
-  avatar: { src: string; position: string };
+  avatar: { src: string };
 };
 
 export function UserMenu({ displayName, avatar }: UserMenuProps) {
@@ -39,26 +39,29 @@ export function UserMenu({ displayName, avatar }: UserMenuProps) {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
+        // Figma header chip: 202×50, 6.9px padding, 1px white/10 outline (measured from the render).
         className={cn(
-          "flex h-10 items-center gap-3 rounded-lg border border-white/10 pr-3 pl-4",
-          "bg-linear-to-r from-[#06113a] to-[#0a1b55] transition-colors hover:border-white/20",
+          "flex h-[50.2px] w-[202px] items-center justify-end gap-[5.5px] rounded-[7.56px] border border-white/10 p-[6.87px]",
+          "bg-linear-to-r from-black/10 to-[rgb(12_55_151/0.1)] transition-colors hover:bg-white/5",
         )}
       >
-        <span className="font-display text-[11px] font-black tracking-wide text-accent uppercase">
+        <span className="font-display text-[11.69px] leading-[17.53px] font-bold tracking-[0.29px] whitespace-nowrap text-accent uppercase">
           {displayName}
         </span>
-        <span className="relative size-7 overflow-hidden rounded-full bg-primary ring-2 ring-accent">
+        {/* 36.4px amber disc with the 30.9px photo inset 2.75px. */}
+        <span className="ml-[6.2px] grid size-[36.43px] shrink-0 place-items-center rounded-full bg-accent">
           <Image
             src={avatar.src}
             alt=""
-            fill
-            sizes="84px"
-            className="scale-[2.6] object-cover"
-            style={{ objectPosition: avatar.position, transformOrigin: avatar.position }}
+            width={62}
+            height={62}
+            className="size-[30.93px] rounded-full object-cover"
           />
         </span>
         <ChevronDown
-          className={cn("size-3.5 text-white/60 transition-transform", open && "rotate-180")}
+          aria-hidden
+          className={cn("size-[9.4px] text-[#71778e] transition-transform", open && "rotate-180")}
+          strokeWidth={2.5}
         />
       </button>
 

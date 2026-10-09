@@ -1,23 +1,26 @@
-import {
-  FileImage,
-  FolderKanban,
-  GraduationCap,
-  House,
-  TextSearch,
-  type LucideIcon,
-} from "lucide-react";
 import type { Route } from "next";
+import type { ComponentType, SVGProps } from "react";
+
+import {
+  AcademyIcon,
+  CasesIcon,
+  EvidenceIcon,
+  HomeIcon,
+  InvestigationIcon,
+} from "@/components/icons/nav-icons";
 
 export type NavItem = { label: string; href: Route };
-export type IconNavItem = NavItem & { icon: LucideIcon };
+export type IconNavItem = NavItem & {
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+};
 
-/** Signed-in game navigation (dashboard sidebar). */
+/** Signed-in game navigation (dashboard sidebar). Icons from Figma. */
 export const dashboardNav: IconNavItem[] = [
-  { label: "Home", href: "/dashboard" as Route, icon: House },
-  { label: "Cases", href: "/cases" as Route, icon: FolderKanban },
-  { label: "Investigation", href: "/investigation" as Route, icon: TextSearch },
-  { label: "Evidence", href: "/evidence" as Route, icon: FileImage },
-  { label: "Academy", href: "/academy" as Route, icon: GraduationCap },
+  { label: "Home", href: "/dashboard" as Route, icon: HomeIcon },
+  { label: "Cases", href: "/cases" as Route, icon: CasesIcon },
+  { label: "Investigation", href: "/investigation" as Route, icon: InvestigationIcon },
+  { label: "Evidence", href: "/evidence" as Route, icon: EvidenceIcon },
+  { label: "Academy", href: "/academy" as Route, icon: AcademyIcon },
 ];
 
 // Routes are typed against the app/ directory once those pages exist;

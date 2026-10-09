@@ -24,7 +24,7 @@ describe("LeadDialog", () => {
     renderDialog();
     expect(dialog().open).toBe(true);
     expect(dialog()).toHaveAccessibleName("This wallet received the missing funds.");
-    expect(screen.getByText("02:40–03:00 UTC")).toHaveClass("font-medium");
+    expect(screen.getByText("02:40–03:00 UTC")).toHaveClass("text-white");
   });
 
   it("links the action to the lead's target", () => {

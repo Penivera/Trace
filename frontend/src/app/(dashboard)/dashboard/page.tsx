@@ -1,8 +1,8 @@
 import type { Metadata, Route } from "next";
 import Image from "next/image";
 
-import { StatsPanel } from "@/features/dashboard/components/stats-panel";
 import { caseRoutes } from "@/features/cases/routes";
+import { StatsPanel } from "@/features/dashboard/components/stats-panel";
 import { getDashboardSummary } from "@/features/dashboard/data";
 import { InvestigatorPicker } from "@/features/investigators/components/investigator-picker";
 import { featuredInvestigator, investigators } from "@/features/investigators/data";
@@ -13,24 +13,35 @@ export const metadata: Metadata = {
   title: "Dashboard",
 };
 
+/*
+ * Figma: Desktop - 4. offsets are relative to <main> (Figma x=396, y=153);
+ * offsets below land each block on its Figma position.
+ */
 export default async function DashboardPage() {
   const summary = await getDashboardSummary();
+  const tracy = featuredInvestigator.fullBody;
 
   return (
     <>
-      <StatsPanel
-        summary={summary}
-        resumeHref={
-          summary.activeCase
-            ? caseRoutes.workspace(summary.activeCase.id)
-            : ("/investigation" as Route)
-        }
-      />
+      {/* x=427, y=160 */}
+      <div className="lg:mt-[7px] lg:ml-[31px]">
+        <StatsPanel
+          summary={summary}
+          resumeHref={
+            summary.activeCase
+              ? caseRoutes.workspace(summary.activeCase.id)
+              : ("/investigation" as Route)
+          }
+        />
+      </div>
 
-      <h2 className="mt-10 font-display text-2xl font-black tracking-tight uppercase lg:mt-[47px] lg:ml-2">
+      {/* x=437, y=461 */}
+      <h2 className="mt-10 font-display text-2xl font-black uppercase lg:mt-[38px] lg:ml-[41px] lg:text-[32px] lg:leading-[1.62]">
         Select investigator
       </h2>
-      <div className="mt-[17px] lg:ml-[11px]">
+
+      {/* x=441, y=525 */}
+      <div className="mt-4 lg:mt-[12.16px] lg:ml-[45px]">
         <InvestigatorPicker
           investigators={investigators}
           action={selectInvestigator}
@@ -38,15 +49,18 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* Positioned against the dashboard layout root: bottom-right, full-bleed. */}
-      <Image
-        src={featuredInvestigator.image.src}
-        alt={featuredInvestigator.description}
-        width={featuredInvestigator.image.width}
-        height={featuredInvestigator.image.height}
-        sizes="(min-width: 1280px) 520px, 0px"
-        className="pointer-events-none absolute right-0 bottom-0 hidden h-[min(756px,52.5vw)] w-auto max-w-none select-none xl:block"
-      />
+      {/* Tracy, positioned on the canvas: 785×958 box at x=1113, y=436 with Figma's crop. */}
+      <div className="pointer-events-none absolute top-[283px] left-[717px] hidden h-[958px] w-[785px] overflow-hidden select-none lg:block">
+        <Image
+          src={tracy.src}
+          alt={featuredInvestigator.description}
+          width={tracy.width}
+          height={tracy.height}
+          preload
+          sizes="2240px"
+          className="absolute top-0 left-[-93.45%] h-[145.97%] w-[285.15%] max-w-none"
+        />
+      </div>
     </>
   );
 }

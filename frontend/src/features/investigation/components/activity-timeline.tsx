@@ -14,10 +14,10 @@ function EntryIcon({ entry }: { entry: TimelineEntry }) {
     <span
       aria-hidden
       className={cn(
-        "grid size-[27px] shrink-0 place-items-center rounded-md border",
-        incoming && "border-emerald-400/25 bg-emerald-400/10 text-emerald-300",
-        !incoming && entry.flagged && "border-accent/60 bg-accent/20 text-accent",
-        !incoming && !entry.flagged && "border-white/10 bg-white/5 text-white/60",
+        "grid size-8 shrink-0 place-items-center rounded-[8px] border",
+        incoming && "border-[rgb(16_185_129/0.25)] bg-[rgb(16_185_129/0.1)] text-[#34d399]",
+        !incoming && entry.flagged && "border-accent bg-accent/25 text-accent",
+        !incoming && !entry.flagged && "border-white/10 bg-[rgb(51_65_85/0.3)] text-[#94a3b8]",
       )}
     >
       {incoming ? (
@@ -39,12 +39,12 @@ type ActivityTimelineProps = {
 /** Transfers in and out of the wallet under investigation, oldest first. */
 export function ActivityTimeline({ entries, entryHref, solved = false }: ActivityTimelineProps) {
   return (
-    <Panel aria-labelledby="activity-timeline" className="px-[22px] pt-[22px] pb-[22px]">
+    <Panel aria-labelledby="activity-timeline" className="flex flex-col gap-4 p-[25px]">
       <PanelLabel id="activity-timeline" tone={solved ? "accent" : "muted"}>
         Activity timeline
       </PanelLabel>
 
-      <ol className="mt-4 flex flex-col gap-[13px]">
+      <ol className="flex flex-col gap-3">
         {entries.map((entry) => {
           const incoming = entry.direction === "in";
           const amount = `${incoming ? "+" : "-"}${formatSol(entry.amountLamports)} SOL`;
@@ -53,42 +53,57 @@ export function ActivityTimeline({ entries, entryHref, solved = false }: Activit
               <Link
                 href={entryHref(entry.id)}
                 className={cn(
-                  "flex h-[53px] items-center gap-3.5 rounded-[10px] border px-4 transition-colors",
+                  "flex items-center gap-3.5 rounded-[12px] border p-[15px] transition-colors",
                   entry.flagged
-                    ? "border-accent bg-linear-to-r from-accent/10 to-transparent shadow-[0_0_18px_-6px_var(--accent)]"
-                    : "border-white/[0.05] bg-[#050f36]/70 hover:border-white/15",
+                    ? "border-accent bg-linear-to-r from-accent/15 via-[rgb(1_27_85/0.4)] to-transparent shadow-[0_0_20px_rgb(252_163_17/0.18)]"
+                    : "border-white/5 bg-[rgb(0_6_20/0.4)] hover:border-white/15",
                 )}
               >
                 <EntryIcon entry={entry} />
-                <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-2 font-mono text-[9.5px] text-[#8f98b3]">
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <p
+                    className={cn(
+                      "flex items-center gap-2 font-mono text-[12px] leading-4",
+                      entry.flagged ? "text-[#cbd5e1]" : "text-[#94a3b8]",
+                    )}
+                  >
                     <time>{entry.time}</time>
                     {entry.flagged && (
-                      <span className="rounded border border-accent/60 bg-accent/10 px-1.5 py-px text-[8px] tracking-wider text-accent uppercase">
+                      <span className="rounded-[4px] border border-accent/60 bg-accent/20 px-[7px] py-[3px] text-[10px] leading-[15px] font-bold tracking-[0.5px] text-accent uppercase shadow-[0_0_8px_rgb(252_163_17/0.25)]">
                         Suspicious
                       </span>
                     )}
                   </p>
-                  <p className="mt-0.5 truncate text-[11px]">
+                  <p className="flex min-w-0 items-center gap-1.5">
                     <span
                       className={cn(
-                        "font-bold",
+                        "font-roboto text-[14px] leading-5",
                         incoming
-                          ? "text-emerald-400"
+                          ? "font-bold text-[#34d399]"
                           : entry.flagged
-                            ? "text-accent"
-                            : "text-foreground",
+                            ? "font-bold text-accent"
+                            : "font-medium text-[#cbd5e1]",
                       )}
                     >
                       {amount}
-                    </span>{" "}
-                    <span className="font-mono text-[10px] text-[#8f98b3]">
+                    </span>
+                    <span
+                      className={cn(
+                        "truncate font-mono text-[12px] leading-4",
+                        entry.flagged
+                          ? "text-[#e2e8f0]"
+                          : entry.counterparty
+                            ? "text-[#cbd5e1]"
+                            : "text-[#94a3b8]",
+                      )}
+                    >
                       {incoming ? "from" : "to"} {entry.counterparty ?? "..."}
                     </span>
                   </p>
                 </div>
                 <ChevronRight
-                  className={cn("size-4", entry.flagged ? "text-accent" : "text-white/40")}
+                  className={cn("size-4", entry.flagged ? "text-accent" : "text-[#64748b]")}
+                  strokeWidth={2}
                 />
               </Link>
             </li>

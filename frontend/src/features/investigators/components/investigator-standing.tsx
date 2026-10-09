@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils/cn";
 import type { Investigator } from "../data";
 
 /**
- * Full-length investigator (falls back to half-body art) with a floor shadow.
- * Size and position it with `className`; the art is bottom-aligned inside.
+ * Full-length investigator (falls back to half-body art). Size and position
+ * it with `className`; the art is bottom-aligned inside.
  */
 export function InvestigatorStanding({
   investigator,
@@ -21,10 +21,6 @@ export function InvestigatorStanding({
 
   return (
     <div className={cn("pointer-events-none select-none", className)}>
-      <div
-        aria-hidden
-        className="absolute bottom-[-4%] left-1/2 h-[9%] w-[95%] -translate-x-1/2 rounded-[50%] bg-[radial-gradient(closest-side,rgb(1_4_16/0.85),transparent)]"
-      />
       <Image
         src={artwork.src}
         alt={investigator.description}

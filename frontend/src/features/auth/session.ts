@@ -3,7 +3,7 @@ import { z } from "zod";
 export const currentUserSchema = z.object({
   id: z.string(),
   displayName: z.string(),
-  avatar: z.object({ src: z.string(), position: z.string() }),
+  avatar: z.object({ src: z.string() }),
 });
 
 export type CurrentUser = z.infer<typeof currentUserSchema>;
@@ -16,7 +16,7 @@ export async function getCurrentUser(): Promise<CurrentUser> {
   return {
     id: "mock-user",
     displayName: "Diva Montess",
-    // Portrait crop of an investigator image until users can upload avatars.
-    avatar: { src: "/investigators/officer2.png", position: "61% 38%" },
+    // Profile picture from the Figma header until users can upload their own.
+    avatar: { src: "/avatars/diva-montess.jpg" },
   };
 }

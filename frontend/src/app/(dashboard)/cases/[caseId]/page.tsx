@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { CaseBriefing, CaseBriefingSkeleton } from "@/features/cases/components/case-briefing";
 import { caseIds, getCaseBrief } from "@/features/cases/data";
 import { caseRoutes } from "@/features/cases/routes";
-import { InvestigatorFigure } from "@/features/investigators/components/investigator-figure";
+import { BriefingCompanion } from "@/features/investigators/components/briefing-companion";
 import { LeadInvestigatorPortrait } from "@/features/investigators/components/lead-investigator-portrait";
 import { getSelectedInvestigator } from "@/features/investigators/selection";
 
@@ -26,11 +26,14 @@ async function CaseBriefingContent({ params }: Pick<Props, "params">) {
   if (!caseBrief) notFound();
 
   return (
-    <CaseBriefing
-      caseBrief={caseBrief}
-      proceedHref={caseRoutes.offer(caseId)}
-      companion={<InvestigatorFigure investigator={investigator} />}
-    />
+    <>
+      <CaseBriefing caseBrief={caseBrief} proceedHref={caseRoutes.offer(caseId)} />
+      {/* Canvas position x=1440, y=435 (Figma Group 11). */}
+      <BriefingCompanion
+        investigator={investigator}
+        className="absolute! top-[282px] left-[1044px] hidden lg:block"
+      />
+    </>
   );
 }
 
@@ -44,8 +47,8 @@ export default function CaseBriefingPage(props: Props) {
       <Suspense fallback={<CaseBriefingSkeleton />}>
         <CaseBriefingContent {...props} />
       </Suspense>
-      {/* Positioned against the dashboard layout root, top-right. */}
-      <LeadInvestigatorPortrait className="absolute top-[101px] right-[38px] hidden xl:block" />
+      {/* Canvas position x=1440, y=123 (Figma Group 16). */}
+      <LeadInvestigatorPortrait className="absolute! top-[-30px] left-[1044px] hidden lg:block" />
     </>
   );
 }

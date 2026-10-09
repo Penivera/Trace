@@ -77,41 +77,47 @@ export function LeadDialog({ lead, actionHref, delayMs }: LeadDialogProps) {
     <dialog
       ref={dialogRef}
       aria-labelledby={titleId}
+      // Figma: Desktop - 9 › "Centered dialog", 536px wide.
       className={cn(
-        "m-auto w-[min(447px,calc(100vw-2rem))] rounded-2xl border border-white/10 p-0 text-foreground",
-        "bg-linear-to-br from-[#06144f] via-[#071a5e] to-[#0a2275]",
-        "shadow-[0_30px_80px_-20px_rgb(0_0_0/0.85),6px_6px_0_-5px_var(--accent),inset_0_1px_0_rgb(255_255_255/0.06)]",
-        "backdrop:bg-[#020a23]/55 backdrop:backdrop-blur-[5px]",
+        "m-auto w-[min(536px,calc(100vw-2rem))] overflow-hidden rounded-[24px] border-[1.5px] border-transparent p-0 text-foreground backdrop-blur-[14px]",
+        "[background:linear-gradient(145deg,#000b23,#01226d)_padding-box,linear-gradient(120deg,rgb(252_163_17/0.15),rgb(0_36_114/0.55)_35%,#06257a_65%,#fca311)_border-box]",
+        "shadow-[0_20px_50px_-10px_rgb(0_0_0/0.7),0_0_35px_2px_rgb(139_92_246/0.25)]",
+        "backdrop:bg-black/45 backdrop:backdrop-blur-[3px]",
         "motion-safe:open:animate-fade-up",
       )}
     >
-      <div className="px-[26px] pt-[28px] pb-[26px]">
-        <span className="inline-flex h-[26px] items-center rounded-full border border-violet-500/40 bg-[#05081a] px-4 font-display text-[10px] font-black tracking-[0.18em] text-accent uppercase shadow-[0_0_12px_-2px_rgb(139_92_246/0.6)]">
+      {/* Specular glare along the top edge. */}
+      <span
+        aria-hidden
+        className="absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-[#22d3ee] to-transparent opacity-40"
+      />
+      <div className="flex flex-col items-start gap-3 p-6 sm:p-8">
+        <span className="rounded-full border border-[rgb(168_85_247/0.4)] bg-[#000614] py-[7px] pr-[19px] pl-[23px] font-display text-[11px] leading-[16.5px] font-bold tracking-[2.2px] text-accent uppercase shadow-[0_0_20px_-3px_rgb(147_51_234/0.5)]">
           {lead.badge}
         </span>
 
         <h2
           id={titleId}
-          className="mt-[22px] font-display text-base font-black tracking-tight uppercase"
+          className="pt-[7px] font-display text-[20px] leading-[35.75px] font-bold tracking-[-0.65px] uppercase"
         >
           {lead.title}
         </h2>
-        <p className="mt-3 text-xs leading-[22px] text-foreground/80">
-          {renderHighlights(lead.message, "font-medium text-foreground")}
+        <p className="font-roboto text-[15px] leading-[24.38px] text-[#cbd5e1]">
+          {renderHighlights(lead.message, "text-white")}
         </p>
 
-        <div className="mt-7 flex items-center gap-6">
+        <div className="flex w-full items-center gap-4 pt-6">
           <Link
             href={actionHref}
             autoFocus
-            className="grid h-11 flex-1 place-items-center rounded-xl bg-accent font-display text-[13px] font-black text-accent-foreground uppercase shadow-[0_8px_20px_-6px_rgb(139_92_246/0.55)] transition-[filter] hover:brightness-110"
+            className="flex-1 rounded-[16px] bg-accent px-6 py-3.5 text-center font-display text-[14px] leading-6 font-bold tracking-[0.4px] text-black uppercase shadow-[0_10px_15px_-3px_rgb(147_51_234/0.4),0_4px_6px_-4px_rgb(147_51_234/0.4)] transition-[filter] hover:brightness-110 sm:text-[16px]"
           >
             {lead.actionLabel}
           </Link>
           <button
             type="button"
             onClick={() => dialogRef.current?.close()}
-            className="px-2 font-display text-[13px] font-black uppercase transition-colors hover:text-accent"
+            className="rounded-[16px] px-5 py-3.5 font-display text-[16px] leading-6 font-black uppercase transition-colors hover:text-accent"
           >
             Later
           </button>
