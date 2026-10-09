@@ -1,11 +1,10 @@
 "use client";
 
 import { ChevronDown, LogOut } from "lucide-react";
-import type { Route } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import { logoutAction } from "@/features/auth/actions";
 import { cn } from "@/lib/utils/cn";
 
 type UserMenuProps = {
@@ -70,14 +69,17 @@ export function UserMenu({ displayName, avatar }: UserMenuProps) {
           role="menu"
           className="absolute right-0 mt-2 w-44 overflow-hidden rounded-lg border border-white/10 bg-background/95 py-1 shadow-2xl backdrop-blur-md"
         >
-          <Link
-            role="menuitem"
-            href={"/login" as Route}
-            className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-primary"
-          >
-            <LogOut className="size-4 text-muted" />
-            Log out
-          </Link>
+          {/* A Server Action, so logging out clears the httpOnly session cookie. */}
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              role="menuitem"
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-primary"
+            >
+              <LogOut className="size-4 text-muted" />
+              Log out
+            </button>
+          </form>
         </div>
       )}
     </div>
