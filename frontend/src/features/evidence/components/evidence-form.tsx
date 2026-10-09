@@ -1,7 +1,8 @@
 "use client";
 
 import { ArrowRight, CircleCheck } from "lucide-react";
-import { useActionState, useId } from "react";
+import { useActionState, useEffect, useId } from "react";
+import { toast } from "sonner";
 
 import { fieldErrorId } from "@/components/ui/field";
 import { FormAlert } from "@/components/ui/form-alert";
@@ -75,6 +76,12 @@ export function EvidenceForm({
   const [state, formAction, pending] = useActionState(action, { status: "idle" });
   const theoryId = useId();
   const invalid = state.status === "invalid" ? state : null;
+
+  // The panel below confirms in place; the toast confirms wherever the player is looking.
+  useEffect(() => {
+    if (state.status === "received")
+      toast.success("Evidence submitted", { description: state.message });
+  }, [state]);
 
   if (state.status === "received") {
     return (

@@ -4,6 +4,8 @@ import type { Route } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { setFlash } from "@/features/flash/server";
+
 import { verifyDemoCredentials } from "./demo-account";
 import { clearFailures, recordFailure, retryAfterMinutes } from "./rate-limit";
 import { LOGIN_PAGE, safeRedirectPath } from "./routes";
@@ -12,7 +14,7 @@ import { createSession, deleteSession } from "./session";
 import { SessionConfigError } from "./session-token";
 
 /** Either why sign-in failed, or where to go next (always a safe, same-site game path). */
-export type LoginResult = { error: string } | { redirectTo: Route };
+export type LoginResult = { error: string } | { redirectTo: Route; displayName: string };
 
 /** Best-effort client IP for throttling (set by the hosting proxy). */
 async function clientIp() {
@@ -57,10 +59,11 @@ export async function loginAction(values: unknown, next?: unknown): Promise<Logi
   }
   clearFailures(throttleKey);
 
-  return { redirectTo: safeRedirectPath(next) };
+  return { redirectTo: safeRedirectPath(next), displayName: user.displayName };
 }
 
 export async function logoutAction() {
   await deleteSession();
+  await setFlash("signed-out");
   redirect(LOGIN_PAGE);
 }

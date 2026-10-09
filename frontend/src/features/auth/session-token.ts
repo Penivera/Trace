@@ -24,19 +24,18 @@ const sessionPayloadSchema = z.object({
 
 export type SessionPayload = z.infer<typeof sessionPayloadSchema>;
 
-/** Local-only fallback so `pnpm dev` works without setup. Never used in production. */
-const DEV_SECRET = "trace-dev-only-session-secret-do-not-use-in-production";
-
 export class SessionConfigError extends Error {
   override readonly name = "SessionConfigError";
 }
 
-/** The signing secret, or null when production is missing one (fail closed). */
+/**
+ * The signing secret, or null when it's missing or too short: then no session
+ * verifies and login reports "not configured" (fail closed). There is
+ * deliberately no fallback in code, in any environment.
+ */
 function sessionSecret(): string | null {
   const secret = process.env.SESSION_SECRET;
-  if (secret && secret.length >= 32) return secret;
-  if (process.env.NODE_ENV === "production") return null;
-  return DEV_SECRET;
+  return secret && secret.length >= 32 ? secret : null;
 }
 
 const encoder = new TextEncoder();

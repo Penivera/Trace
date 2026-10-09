@@ -1,8 +1,13 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { signSession, verifySessionToken } from "./session-token";
 
 const inAnHour = () => Math.floor(Date.now() / 1000) + 3600;
+
+// There is no built-in secret; each test supplies one (a test-only value).
+beforeEach(() => {
+  vi.stubEnv("SESSION_SECRET", "test-only-secret-".padEnd(40, "x"));
+});
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -43,8 +48,8 @@ describe("session token", () => {
     },
   );
 
-  it("fails closed in production without a secret", async () => {
-    vi.stubEnv("NODE_ENV", "production");
+  it.each(["development", "production"])("fails closed without a secret (%s)", async (env) => {
+    vi.stubEnv("NODE_ENV", env);
     vi.stubEnv("SESSION_SECRET", "");
     await expect(signSession({ sub: "demo-agent", exp: inAnHour() })).rejects.toThrow(
       /SESSION_SECRET/,

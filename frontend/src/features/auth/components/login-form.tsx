@@ -5,6 +5,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Field, fieldErrorId } from "@/components/ui/field";
@@ -39,6 +40,9 @@ export function LoginForm() {
         setError("root", { message: result.error });
         return;
       }
+      toast.success(`Welcome back, ${result.displayName.split(" ")[0]}`, {
+        description: "Your case files are unlocked.",
+      });
       router.replace(result.redirectTo);
     } catch {
       setError("root", {
@@ -94,8 +98,8 @@ export function LoginForm() {
         label="Continue with"
         // TODO: start the OAuth redirect once the backend exposes it.
         onContinue={(provider) =>
-          setError("root", {
-            message: `Signing in with ${oauthProviderName[provider]} isn't available yet.`,
+          toast.info(`${oauthProviderName[provider]} sign-in is coming soon`, {
+            description: "Use the demo login from your team for now.",
           })
         }
       />

@@ -31,7 +31,10 @@ describe("LoginForm", () => {
 
   it("sends the credentials and goes where the server says", async () => {
     window.history.replaceState(null, "", "/login?next=%2Finvestigation%2Fcase-001");
-    loginAction.mockResolvedValue({ redirectTo: "/investigation/case-001" });
+    loginAction.mockResolvedValue({
+      redirectTo: "/investigation/case-001",
+      displayName: "Diva Montess",
+    });
     const user = userEvent.setup();
     render(<LoginForm />);
 

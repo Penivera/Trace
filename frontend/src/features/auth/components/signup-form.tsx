@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Field, fieldErrorId } from "@/components/ui/field";
@@ -95,8 +96,8 @@ export function SignupForm() {
         label="Sign up with"
         // TODO: start the OAuth redirect once the backend exposes it.
         onContinue={(provider) =>
-          setError("root", {
-            message: `Signing up with ${oauthProviderName[provider]} isn't available yet.`,
+          toast.info(`${oauthProviderName[provider]} sign-in is coming soon`, {
+            description: "Use the demo login from your team for now.",
           })
         }
       />
