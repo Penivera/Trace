@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { TraceLoader } from "@/components/feedback/trace-loader";
 import { caseRoutes } from "@/features/cases/routes";
 import { EvidenceForm } from "@/features/evidence/components/evidence-form";
 import { evidenceCaseIds, getEvidencePrompt } from "@/features/evidence/data";
@@ -84,7 +85,7 @@ async function EvidenceContent({ params }: Pick<Props, "params">) {
 export default function EvidencePage(props: Props) {
   return (
     <>
-      <Suspense>
+      <Suspense fallback={<TraceLoader label="Opening the evidence board" />}>
         <EvidenceContent params={props.params} />
       </Suspense>
       <Suspense>
@@ -94,13 +95,13 @@ export default function EvidencePage(props: Props) {
   );
 }
 
-/** Positioned against the dashboard layout root, top-right. */
+/** Top-right, relative to <main> (the dashboard layout's positioning context). */
 async function Portrait() {
   const investigator = await getSelectedInvestigator();
   return (
     <InvestigatorPortrait
       investigator={investigator}
-      className="absolute top-[124px] right-[26px] hidden size-[200px] xl:block"
+      className="absolute top-[36px] right-[26px] hidden size-[200px] xl:block"
     />
   );
 }

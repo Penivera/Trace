@@ -13,7 +13,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { login } from "../api";
 import { loginSchema } from "../schemas";
 import { FormAlert } from "@/components/ui/form-alert";
-import { SocialSignIn } from "./social-sign-in";
+import { oauthProviderName, SocialSignIn } from "./social-sign-in";
 
 export function LoginForm() {
   const {
@@ -84,7 +84,12 @@ export function LoginForm() {
 
       <SocialSignIn
         label="Continue with"
-        onUnavailable={(message) => setError("root", { message })}
+        // TODO: start the OAuth redirect once the backend exposes it.
+        onContinue={(provider) =>
+          setError("root", {
+            message: `Signing in with ${oauthProviderName[provider]} isn't available yet.`,
+          })
+        }
       />
     </form>
   );

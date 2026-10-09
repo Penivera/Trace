@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { TraceLoader } from "@/components/feedback/trace-loader";
 import { CaseFile } from "@/features/cases/components/case-file";
 import { caseIds, getCaseFile } from "@/features/cases/data";
 import { caseRoutes } from "@/features/cases/routes";
@@ -54,7 +55,7 @@ async function CaseFileContent({ params }: Pick<Props, "params">) {
 
 export default function CaseFilePage(props: Props) {
   return (
-    <Suspense>
+    <Suspense fallback={<TraceLoader label="Opening the case file" />}>
       <CaseFileContent {...props} />
     </Suspense>
   );
