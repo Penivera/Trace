@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens.
+ *
+ * Brand palette → semantic tokens → Tailwind utilities (bg-background, text-accent…).
+ * Components use the semantic names only, so a palette change is a one-line edit here.
+ *
+ * WCAG contrast (AA needs 4.5:1 for body text):
+ *   foreground on background  18.0   foreground on primary  12.9
+ *   accent     on background   9.7   accent     on primary   6.9
+ *   muted      on background   7.8   muted      on primary   5.6
+ *   primary    on background   1.4  ← never use primary for text on background.
+ */
+:root {
+  --brand-midnight: #020a23;
+  --brand-navy: #002472;
+  --brand-amber: #fca311;
+  --brand-white: #f5f5f5;
+
+  --background: var(--brand-midnight);
+  --foreground: var(--brand-white);
+  --primary: var(--brand-navy);
+  --primary-foreground: var(--brand-white);
+  --accent: var(--brand-amber);
+  --accent-foreground: var(--brand-midnight);
+  --muted: color-mix(in srgb, var(--brand-white) 65%, var(--brand-midnight));
+  --border: color-mix(in srgb, var(--brand-white) 12%, transparent);
+  --ring: var(--brand-amber);
+  /* Errors. 6.2:1 on navy, 8.6:1 on midnight. */
+  --destructive: #ff8a80;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  /* Where a Figma screen sets text in Roboto instead of the Design System's Inter. */
+  --font-roboto: var(--font-roboto-src), ui-sans-serif, system-ui, sans-serif;
+  /* Integral CF once licensed files are added; falls back to Inter until then. */
+  --font-display: var(--font-integral, var(--font-inter)), ui-sans-serif, system-ui, sans-serif;
+
+  /* Entrance animations. Use with `motion-safe:` so reduced-motion users skip them. */
+  --animate-fade-up: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-rise: rise 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(48px);
+    }
+  }
+}
+
+/*
+ * Design canvas: screens are built at the exact pixel sizes of the Figma frame
+ * (`--design-w`, default 1728) and scaled down proportionally on narrower
+ * desktops, like a game UI. `--vw` (unitless viewport width) is set by a script
+ * in the root layout; without it the calc is invalid and nothing is scaled.
+ * Phones/tablets (< 1024px) are never scaled; they use the stacked layouts.
+ */
+@layer components {
+  .design-canvas {
+    --design-w: 1728;
+  }
+
+  @media (min-width: 1024px) {
+    .design-canvas {
+      --ui-scale: min(1, calc(var(--vw) / var(--design-w)));
+      zoom: var(--ui-scale);
+      /* Viewport units are zoomed too; divide them back out to fill the screen. */
+      min-height: calc(100svh / var(--ui-scale));
+    }
+  }
+}
+
+/*
+ * Scroll-linked fade-in (no JS): runs from 0 to 1 over the first 120px of page
+ * scroll. Browsers without scroll timelines keep the element at its base style.
+ */
+@supports (animation-timeline: scroll()) {
+  .scroll-solidify {
+    animation: scroll-solidify linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 120px;
+  }
+
+  @keyframes scroll-solidify {
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-background font-sans text-foreground;
+  }
+
+  /*
+   * Pointer cursor on everything clickable. Links get it from the browser;
+   * Tailwind v4's preflight leaves buttons with the default arrow.
+   */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  select:not(:disabled),
+  summary,
+  input:is(
+      [type="checkbox"],
+      [type="radio"],
+      [type="submit"],
+      [type="button"],
+      [type="reset"],
+      [type="file"]
+    ):not(:disabled),
+  label:has(> input:is([type="checkbox"], [type="radio"]):not(:disabled)) {
+    cursor: pointer;
+  }
+
+  :disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  ::selection {
+    @apply bg-accent text-accent-foreground;
+  }
+}

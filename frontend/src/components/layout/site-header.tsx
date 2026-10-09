@@ -1,0 +1,117 @@
+"use client";
+
+import { Menu, X } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import { buttonVariants } from "@/components/ui/button";
+import { authNav, mainNav } from "@/config/navigation";
+import { siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils/cn";
+
+export function SiteHeader() {
+  const pathname = usePathname();
+  // Remember which page the menu was opened on: navigating elsewhere closes it
+  // without needing an effect to reset state.
+  const [openedOn, setOpenedOn] = useState<string | null>(null);
+  const menuOpen = openedOn === pathname;
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpenedOn(null);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+
+  return (
+    <header className="absolute inset-x-0 top-0 z-30">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-6 px-5 sm:px-8">
+        <Link
+          href="/"
+          className="font-display text-lg font-black tracking-wider uppercase sm:text-xl"
+        >
+          {siteConfig.name}
+        </Link>
+
+        <nav aria-label="Main" className="hidden md:block">
+          <ul className="flex items-center gap-10 lg:gap-14">
+            {mainNav.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  aria-current={isActive(item.href) ? "page" : undefined}
+                  className={cn(
+                    "relative py-2 text-xs font-bold tracking-wider text-foreground/85 uppercase transition-colors hover:text-foreground",
+                    "after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-accent after:transition-transform after:duration-300 hover:after:scale-x-100",
+                    "aria-[current=page]:text-foreground aria-[current=page]:after:scale-x-100",
+                  )}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="hidden items-center gap-4 md:flex">
+          <Link
+            href={authNav.login.href}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
+            {authNav.login.label}
+          </Link>
+          <Link href={authNav.signUp.href} className={buttonVariants({ size: "sm" })}>
+            {authNav.signUp.label}
+          </Link>
+        </div>
+
+        <button
+          type="button"
+          className="-mr-2 rounded-md p-2 md:hidden"
+          aria-expanded={menuOpen}
+          aria-controls="mobile-nav"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          onClick={() => setOpenedOn(menuOpen ? null : pathname)}
+        >
+          {menuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+        </button>
+      </div>
+
+      {menuOpen && (
+        <nav
+          id="mobile-nav"
+          aria-label="Main"
+          className="mx-4 rounded-2xl border border-border bg-background/95 p-4 shadow-2xl backdrop-blur-md md:hidden"
+        >
+          <ul className="flex flex-col">
+            {mainNav.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  aria-current={isActive(item.href) ? "page" : undefined}
+                  className="block rounded-lg px-3 py-3 text-sm font-bold tracking-wider uppercase hover:bg-primary aria-[current=page]:text-accent"
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-3 grid grid-cols-2 gap-3 border-t border-border pt-4">
+            <Link
+              href={authNav.login.href}
+              className={buttonVariants({ variant: "ghost", className: "border border-accent/40" })}
+            >
+              {authNav.login.label}
+            </Link>
+            <Link href={authNav.signUp.href} className={buttonVariants()}>
+              {authNav.signUp.label}
+            </Link>
+          </div>
+        </nav>
+      )}
+    </header>
+  );
+}
