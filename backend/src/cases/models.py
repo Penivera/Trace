@@ -104,6 +104,30 @@ class ActivityItem(BaseModel):
     link: Target | None = None
 
 
+class TransactionProgress(BaseModel):
+    completed: int = 1
+    total: int = 5
+
+
+class TransactionDetail(BaseModel):
+    id: str
+    signature: str = "5fJ8...2K9L"
+    status: Literal["confirmed", "finalized", "failed"] = "confirmed"
+    time: str
+    amountLamports: int
+    fromWalletId: str
+    toWalletId: str
+    fromWallet: str | None = None
+    toWallet: str | None = None
+    progress: TransactionProgress = Field(default_factory=TransactionProgress)
+    lead: Lead | None = None
+    counterparty: str | None = None
+    direction: Literal["in", "out"] = "out"
+    key: bool = False
+    flagged: bool = False
+    link: Target | None = None
+
+
 class WalletDetail(BaseModel):
     id: str
     label: str

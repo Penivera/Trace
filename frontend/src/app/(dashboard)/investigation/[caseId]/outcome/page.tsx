@@ -75,7 +75,7 @@ async function OutcomeContent({ params }: Pick<Props, "params">) {
 
 export default function OutcomePage(props: Props) {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="min-h-screen" />}>
       <OutcomeContent params={props.params} />
     </Suspense>
   );

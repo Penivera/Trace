@@ -36,6 +36,25 @@ const cases: Record<string, CaseBrief> = {
       "Explain where the money went and what happened to it.",
     ],
   },
+  "case-002": {
+    id: "case-002",
+    number: "Case 002",
+    title: "The 120,000 wETH Wormhole Bridge Exploit",
+    brief: [
+      "{{120,000 wETH}} (~$325M USD) was fraudulently minted on the Wormhole Solana Bridge.",
+      "On {{February 2, 2022 at 18:24 UTC}}, an attacker exploited a vulnerability in the Wormhole core program on Solana.",
+      "The attacker bypassed Guardian signature verification by injecting a fake Instructions sysvar account via deprecated {{load_instruction_at}}.",
+      "A fraudulent Validator Action Approval (VAA) was posted via {{post_vaa}}, enabling {{complete_wrapped}} to mint 120,000 unbacked wETH.",
+      "The attacker bridged 93,750 ETH directly to Ethereum address {{0x629e7Da20197a5429d30da36E77d06CdF796b71A}}.",
+    ],
+    objectives: [
+      "Inspect the signature verification bypass transaction (tx-verify-bypass).",
+      "Examine the fraudulent Guardian post_vaa authorization record.",
+      "Trace the complete_wrapped mint transaction that spawned 120,000 wETH.",
+      "Trace the capital outflow bridging 93,750 ETH across to Ethereum.",
+      "Submit your forensic conclusion on the exploit vector and exit address.",
+    ],
+  },
 };
 
 export const caseIds = Object.keys(cases);
@@ -86,16 +105,52 @@ const caseFiles: Record<string, CaseFile> = {
       "Build your theory",
     ],
   },
+  "case-002": {
+    id: "case-002",
+    number: "Case 002",
+    codename: "Operation Secp256k1 Bypass",
+    difficulty: "Veteran",
+    status: "open",
+    briefing: [
+      "{{120,000 wETH}} (~$325M USD) was fraudulently minted on the Wormhole Solana Bridge.",
+      "On {{February 2, 2022 at 18:24 UTC}}, an attacker exploited a vulnerability in the Wormhole core program on Solana.",
+      "The attacker bypassed Guardian signature verification by injecting a fake Instructions sysvar account via deprecated {{load_instruction_at}}.",
+      "A fraudulent Validator Action Approval (VAA) was posted via {{post_vaa}}, enabling {{complete_wrapped}} to mint 120,000 unbacked wETH.",
+      "The attacker bridged 93,750 ETH directly to Ethereum address {{0x629e7Da20197a5429d30da36E77d06CdF796b71A}}.",
+    ],
+    knownInformation: {
+      initialWallet: "wormDTUJ...LBCgUb",
+      missingAmount: "120,000 wETH ($325M)",
+      approximateTime: "18 : 24 UTC",
+    },
+    objectives: [
+      "Inspect the signature verification bypass transaction (tx-verify-bypass).",
+      "Examine the fraudulent Guardian post_vaa authorization record.",
+      "Trace the complete_wrapped mint transaction that spawned 120,000 wETH.",
+      "Trace the capital outflow bridging 93,750 ETH across to Ethereum.",
+      "Submit your forensic conclusion on the exploit vector and exit address.",
+    ],
+  },
 };
 
-/** Replace with `serverApi.get(\`/cases/${caseId}/file\`, caseFileSchema)` once available. */
+/** Retrieve case file from backend serverApi or fallback to known case files. */
 export async function getCaseFile(caseId: string): Promise<CaseFile | null> {
-  const found = caseFiles[caseId];
-  return found ? caseFileSchema.parse(found) : null;
+  try {
+    const { serverApi } = await import("@/lib/api/server");
+    return await serverApi.get(`/cases/${caseId}/file`, caseFileSchema);
+  } catch {
+    const found = caseFiles[caseId];
+    return found ? caseFileSchema.parse(found) : null;
+  }
 }
 
-/** Replace with `serverApi.get(\`/cases/${caseId}\`, caseBriefSchema)` once available. */
+/** Retrieve case brief from backend serverApi or fallback to known cases. */
 export async function getCaseBrief(caseId: string): Promise<CaseBrief | null> {
-  const found = cases[caseId];
-  return found ? caseBriefSchema.parse(found) : null;
+  try {
+    const { serverApi } = await import("@/lib/api/server");
+    return await serverApi.get(`/cases/${caseId}`, caseBriefSchema);
+  } catch {
+    const found = cases[caseId];
+    return found ? caseBriefSchema.parse(found) : null;
+  }
 }

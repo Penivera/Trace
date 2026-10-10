@@ -58,3 +58,30 @@ class GoogleAuthRequest(BaseModel):
 class GoogleAuthUrlResponse(BaseModel):
     url: str
 
+
+class AvatarObject(BaseModel):
+    src: str
+
+
+class CurrentUserResponse(BaseModel):
+    id: str
+    displayName: str
+    avatar: AvatarObject = Field(default_factory=lambda: AvatarObject(src="/avatars/diva-montess.jpg"))
+
+
+class ActiveCaseSummary(BaseModel):
+    id: str
+    label: str
+
+
+class DashboardProgress(BaseModel):
+    completed: int
+    total: int
+
+
+class DashboardSummaryResponse(BaseModel):
+    activeCase: ActiveCaseSummary | None = None
+    objectives: DashboardProgress = Field(default_factory=lambda: DashboardProgress(completed=1, total=5))
+    evidenceCount: int = 0
+    academy: DashboardProgress = Field(default_factory=lambda: DashboardProgress(completed=0, total=8))
+

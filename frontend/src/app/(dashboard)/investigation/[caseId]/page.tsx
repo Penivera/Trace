@@ -155,7 +155,7 @@ async function WorkspaceContent({ params, searchParams }: Props) {
 
 export default function WorkspacePage(props: Props) {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="min-h-screen" />}>
       <WorkspaceContent {...props} />
     </Suspense>
   );

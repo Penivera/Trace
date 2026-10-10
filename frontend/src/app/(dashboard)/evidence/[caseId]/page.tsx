@@ -84,10 +84,10 @@ async function EvidenceContent({ params }: Pick<Props, "params">) {
 export default function EvidencePage(props: Props) {
   return (
     <>
-      <Suspense>
+      <Suspense fallback={<div className="min-h-screen" />}>
         <EvidenceContent params={props.params} />
       </Suspense>
-      <Suspense>
+      <Suspense fallback={null}>
         <Portrait />
       </Suspense>
     </>

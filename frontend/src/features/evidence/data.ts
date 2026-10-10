@@ -35,10 +35,14 @@ const prompts: Record<string, EvidencePrompt> = {
 
 export const evidenceCaseIds = Object.keys(prompts);
 
-/** Replace with `serverApi.get(\`/cases/${caseId}/evidence-prompt\`, evidencePromptSchema)`. */
 export async function getEvidencePrompt(caseId: string): Promise<EvidencePrompt | null> {
-  const found = prompts[caseId];
-  return found ? evidencePromptSchema.parse(found) : null;
+  try {
+    const { serverApi } = await import("@/lib/api/server");
+    return await serverApi.get(`/cases/${caseId}/evidence-prompt`, evidencePromptSchema);
+  } catch {
+    const found = prompts[caseId];
+    return found ? evidencePromptSchema.parse(found) : null;
+  }
 }
 
 /**

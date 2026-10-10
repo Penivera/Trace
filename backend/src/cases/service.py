@@ -19,6 +19,8 @@ from src.cases.models import (
     Target,
     TimelineEntry,
     TraceScore,
+    TransactionDetail,
+    TransactionProgress,
     WalletDetail,
     WalletSummary,
     Workspace,
@@ -487,25 +489,64 @@ class CaseService:
         return WalletDetail(**wallet_data)
 
     @staticmethod
-    async def get_transaction_detail(case_id: str, tx_id: str) -> ActivityItem | None:
+    async def get_transaction_detail(case_id: str, tx_id: str) -> TransactionDetail | None:
         """Retrieve forensic transaction detail dynamically from case database."""
         await CaseService.ensure_initial_seed()
         c = await storage.get_case_by_id(case_id)
         if not c:
             return None
 
+        tx_data: dict[str, Any] | None = None
         # Check transactions map first
         txs = json.loads(c.transactions_json)
         if tx_id in txs:
-            return ActivityItem(**txs[tx_id])
+            tx_data = dict(txs[tx_id])
+        else:
+            # Fallback to searching all wallet activities
+            wallets = json.loads(c.wallets_json)
+            for w in wallets.values():
+                for act in w.get("activity", []):
+                    if act.get("id") == tx_id:
+                        tx_data = dict(act)
+                        break
+                if tx_data:
+                    break
 
-        # Fallback to searching all wallet activities
-        wallets = json.loads(c.wallets_json)
-        for w in wallets.values():
-            for act in w.get("activity", []):
-                if act.get("id") == tx_id:
-                    return ActivityItem(**act)
-        return None
+        if not tx_data:
+            return None
+
+        from_w = tx_data.get("fromWalletId") or tx_data.get("fromWallet") or "treasury"
+        to_w = tx_data.get("toWalletId") or tx_data.get("toWallet") or "wallet-b"
+        prog = tx_data.get("progress")
+        if isinstance(prog, dict):
+            progress_obj = TransactionProgress(**prog)
+        else:
+            progress_obj = TransactionProgress(completed=1, total=5)
+
+        lead_val = tx_data.get("lead")
+        lead_obj = Lead(**lead_val) if isinstance(lead_val, dict) else None
+
+        link_val = tx_data.get("link")
+        link_obj = Target(**link_val) if isinstance(link_val, dict) else None
+
+        return TransactionDetail(
+            id=tx_data["id"],
+            signature=tx_data.get("signature", "5fJ8...2K9L"),
+            status=tx_data.get("status", "confirmed"),
+            time=tx_data.get("time", "02:43:18 UTC"),
+            amountLamports=tx_data.get("amountLamports", 0),
+            fromWalletId=from_w,
+            toWalletId=to_w,
+            fromWallet=from_w,
+            toWallet=to_w,
+            progress=progress_obj,
+            lead=lead_obj,
+            counterparty=tx_data.get("counterparty"),
+            direction=tx_data.get("direction", "out"),
+            key=tx_data.get("key", False),
+            flagged=tx_data.get("flagged", False),
+            link=link_obj,
+        )
 
     @staticmethod
     async def get_evidence_prompt(case_id: str) -> EvidencePrompt | None:
@@ -585,3 +626,23 @@ class CaseService:
         if data:
             return CaseOutcome(**data)
         return None
+
+    @staticmethod
+    async def get_default_outcome(case_id: str) -> CaseOutcome | None:
+        """Retrieve a default solved preview outcome for a case."""
+        await CaseService.ensure_initial_seed()
+        c = await storage.get_case_by_id(case_id)
+        if not c:
+            return None
+        return CaseOutcome(
+            caseId=case_id,
+            title=c.title,
+            summary="You followed the trail to the end. The vault mysteries have been decoded.",
+            score=100,
+            maxScore=100,
+            clues=ClueScore(found=5, total=5),
+            evidenceCollected=2,
+            traces=TraceScore(correct=5, total=5),
+            hintsUsed=0,
+        )
+

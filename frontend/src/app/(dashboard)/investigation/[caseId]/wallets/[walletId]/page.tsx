@@ -73,7 +73,7 @@ async function WalletContent({ params }: Pick<Props, "params">) {
 
 export default function WalletPage(props: Props) {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="min-h-screen" />}>
       <WalletContent {...props} />
     </Suspense>
   );

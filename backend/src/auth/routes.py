@@ -20,7 +20,12 @@ from src.auth.google import (
 )
 from src.auth.jwt import create_access_token
 from src.auth.models import (
+    ActiveCaseSummary,
     AuthResponse,
+    AvatarObject,
+    CurrentUserResponse,
+    DashboardProgress,
+    DashboardSummaryResponse,
     GoogleAuthRequest,
     GoogleAuthUrlResponse,
     LoginRequest,
@@ -33,7 +38,8 @@ from src.auth.models import (
 )
 from src.database.storage import storage
 
-router = APIRouter(prefix="/api/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["auth"])
+me_router = APIRouter(tags=["profile"])
 
 
 @router.post("/signup", response_model=AuthResponse, status_code=status.HTTP_201_CREATED)
@@ -227,5 +233,41 @@ async def google_auth(req: GoogleAuthRequest):
         token=token,
         tokenType="Bearer",
         expiresIn=ttl,
+    )
+
+
+@me_router.get("/me", response_model=CurrentUserResponse)
+async def get_current_user_profile(
+    context: Annotated[AuthenticatedContext | None, Depends(get_auth_context_optional)],
+):
+    """Retrieve profile for the currently logged-in player, or default guest identity."""
+    if context and context.user:
+        return CurrentUserResponse(
+            id=context.user.id,
+            displayName=context.user.username or "Investigator",
+            avatar=AvatarObject(src="/avatars/diva-montess.jpg"),
+        )
+    return CurrentUserResponse(
+        id="mock-user",
+        displayName="Diva Montess",
+        avatar=AvatarObject(src="/avatars/diva-montess.jpg"),
+    )
+
+
+@me_router.get("/me/dashboard", response_model=DashboardSummaryResponse)
+async def get_dashboard_summary(
+    context: Annotated[AuthenticatedContext | None, Depends(get_auth_context_optional)],
+):
+    """Retrieve active case, progress, and objectives summary for dashboard view."""
+    evidence_count = 0
+    if context and context.user:
+        ev_items = await storage.get_evidence_list(context.user.id, "case-001")
+        evidence_count = len(ev_items)
+
+    return DashboardSummaryResponse(
+        activeCase=ActiveCaseSummary(id="case-001", label="Case 001"),
+        objectives=DashboardProgress(completed=min(1 + evidence_count, 5), total=5),
+        evidenceCount=evidence_count,
+        academy=DashboardProgress(completed=0, total=8),
     )
 

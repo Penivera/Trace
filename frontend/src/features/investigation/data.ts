@@ -174,9 +174,15 @@ export async function getWorkspace(
   caseId: string,
   preview?: WorkspacePreview,
 ): Promise<Workspace | null> {
-  const found = workspaces[caseId];
-  if (!found) return null;
-  const workspace = workspaceSchema.parse(found);
+  let workspace: Workspace | null = null;
+  try {
+    const { serverApi } = await import("@/lib/api/server");
+    workspace = await serverApi.get(`/cases/${caseId}/workspace`, workspaceSchema);
+  } catch {
+    const found = workspaces[caseId];
+    workspace = found ? workspaceSchema.parse(found) : null;
+  }
+  if (!workspace) return null;
   if (preview !== "solved") return workspace;
   return {
     ...workspace,
@@ -288,10 +294,14 @@ export const transactionParams = Object.entries(transactions).flatMap(([caseId, 
   Object.keys(byId).map((transactionId) => ({ caseId, transactionId })),
 );
 
-/** Replace with `serverApi.get(\`/cases/${caseId}/transactions/${id}\`, transactionSchema)`. */
 export async function getTransaction(caseId: string, id: string): Promise<Transaction | null> {
-  const found = transactions[caseId]?.[id];
-  return found ? transactionSchema.parse(found) : null;
+  try {
+    const { serverApi } = await import("@/lib/api/server");
+    return await serverApi.get(`/cases/${caseId}/transactions/${id}`, transactionSchema);
+  } catch {
+    const found = transactions[caseId]?.[id];
+    return found ? transactionSchema.parse(found) : null;
+  }
 }
 
 const walletActivitySchema = z.object({
@@ -431,8 +441,12 @@ export const walletParams = Object.entries(wallets).flatMap(([caseId, byId]) =>
   Object.keys(byId).map((walletId) => ({ caseId, walletId })),
 );
 
-/** Replace with `serverApi.get(\`/cases/${caseId}/wallets/${id}\`, walletDetailSchema)`. */
 export async function getWalletDetail(caseId: string, id: string): Promise<WalletDetail | null> {
-  const found = wallets[caseId]?.[id];
-  return found ? walletDetailSchema.parse(found) : null;
+  try {
+    const { serverApi } = await import("@/lib/api/server");
+    return await serverApi.get(`/cases/${caseId}/wallets/${id}`, walletDetailSchema);
+  } catch {
+    const found = wallets[caseId]?.[id];
+    return found ? walletDetailSchema.parse(found) : null;
+  }
 }

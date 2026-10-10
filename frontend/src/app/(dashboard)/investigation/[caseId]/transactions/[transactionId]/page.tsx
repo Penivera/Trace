@@ -92,7 +92,7 @@ async function TransactionContent({ params }: Pick<Props, "params">) {
 
 export default function TransactionPage(props: Props) {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="min-h-screen" />}>
       <TransactionContent {...props} />
     </Suspense>
   );

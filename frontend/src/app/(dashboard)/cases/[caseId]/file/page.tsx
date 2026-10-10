@@ -54,7 +54,7 @@ async function CaseFileContent({ params }: Pick<Props, "params">) {
 
 export default function CaseFilePage(props: Props) {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="min-h-screen" />}>
       <CaseFileContent {...props} />
     </Suspense>
   );

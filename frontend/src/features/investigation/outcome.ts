@@ -32,8 +32,12 @@ const outcomes: Record<string, CaseOutcome> = {
 
 export const outcomeCaseIds = Object.keys(outcomes);
 
-/** Replace with `serverApi.get(\`/cases/${caseId}/outcome\`, caseOutcomeSchema)`. */
 export async function getCaseOutcome(caseId: string): Promise<CaseOutcome | null> {
-  const found = outcomes[caseId];
-  return found ? caseOutcomeSchema.parse(found) : null;
+  try {
+    const { serverApi } = await import("@/lib/api/server");
+    return await serverApi.get(`/cases/${caseId}/outcome`, caseOutcomeSchema);
+  } catch {
+    const found = outcomes[caseId];
+    return found ? caseOutcomeSchema.parse(found) : null;
+  }
 }

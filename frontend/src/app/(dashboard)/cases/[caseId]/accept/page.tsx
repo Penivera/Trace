@@ -48,7 +48,7 @@ async function CaseOfferContent({ params }: Pick<Props, "params">) {
 
 export default function CaseOfferPage(props: Props) {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="min-h-screen" />}>
       <CaseOfferContent {...props} />
     </Suspense>
   );

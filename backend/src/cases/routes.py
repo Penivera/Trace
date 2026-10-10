@@ -8,13 +8,14 @@ from src.cases.models import (
     EvidenceItemRequest,
     EvidencePrompt,
     EvidenceSubmissionRequest,
+    TransactionDetail,
     WalletDetail,
     Workspace,
 )
 from src.cases.service import CaseService
 from src.database.storage import UserRecord, storage
 
-router = APIRouter(prefix="/api/cases", tags=["cases"])
+router = APIRouter(prefix="/cases", tags=["cases"])
 
 
 @router.get("")
@@ -62,7 +63,7 @@ async def get_wallet(case_id: str, wallet_id: str):
     return wallet
 
 
-@router.get("/{case_id}/transactions/{tx_id}")
+@router.get("/{case_id}/transactions/{tx_id}", response_model=TransactionDetail)
 async def get_transaction(case_id: str, tx_id: str):
     """Get forensic transaction details."""
     tx = await CaseService.get_transaction_detail(case_id, tx_id)
@@ -137,10 +138,15 @@ async def submit_case_theory(
 @router.get("/{case_id}/outcome", response_model=CaseOutcome)
 async def get_case_outcome(
     case_id: str,
-    user: Annotated[UserRecord, Depends(get_current_user)],
+    user: Annotated[UserRecord | None, Depends(get_current_user_optional)],
 ):
     """Get the saved outcome and score for a solved case."""
-    outcome = await CaseService.get_outcome(case_id, user.id)
+    if user:
+        outcome = await CaseService.get_outcome(case_id, user.id)
+        if outcome:
+            return outcome
+    outcome = await CaseService.get_default_outcome(case_id)
     if not outcome:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No outcome found for this case yet")
     return outcome
+

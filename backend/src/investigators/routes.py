@@ -5,7 +5,7 @@ from src.auth.dependencies import get_current_user
 from src.database.storage import UserRecord, storage
 from src.investigators.data import FEATURED_INVESTIGATOR, INVESTIGATORS
 
-router = APIRouter(prefix="/api", tags=["investigators"])
+router = APIRouter(tags=["investigators"])
 
 
 class UpdateInvestigatorRequest(BaseModel):
