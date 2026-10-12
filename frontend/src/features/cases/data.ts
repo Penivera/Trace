@@ -1,18 +1,24 @@
+import "server-only";
+
 import { z } from "zod";
 
-export const caseBriefSchema = z.object({
-  id: z.string(),
-  number: z.string(),
-  title: z.string(),
-  /**
-   * Paragraphs. Wrap text in `{{…}}` to highlight it (amounts, times, key phrases).
-   * Use \u00a0 (non-breaking space) inside short values like "20 SOL" so they never split across lines.
-   */
-  brief: z.array(z.string()),
-  objectives: z.array(z.string()),
-});
+import {
+  caseBriefSchema,
+  caseCatalogItemSchema,
+  caseFileSchema,
+  type CaseBrief,
+  type CaseCatalogItem,
+  type CaseFile,
+} from "@/features/api/schemas";
 
-export type CaseBrief = z.infer<typeof caseBriefSchema>;
+import {
+  getCaseBrief as getCaseBriefApi,
+  getCaseFile as getCaseFileApi,
+  listCases as listCasesApi,
+} from "./server-api";
+
+export { caseBriefSchema, caseCatalogItemSchema, caseFileSchema };
+export type { CaseBrief, CaseCatalogItem, CaseFile };
 
 /** MOCK case content until the backend serves cases. Keyed by case id. */
 const cases: Record<string, CaseBrief> = {
@@ -21,8 +27,8 @@ const cases: Record<string, CaseBrief> = {
     number: "Case 001",
     title: "Trace the missing 20 SOL",
     brief: [
-      "{{20 SOL}} disappeared. Find out where it went.",
-      "At {{02:43 UTC}}, a project's treasury wallet sent {{20 SOL}} to an unknown wallet.",
+      "{{20\u00a0SOL}} disappeared. Find out where it went.",
+      "At {{02:43\u00a0UTC}}, a project's treasury wallet sent {{20\u00a0SOL}} to an unknown wallet.",
       "No one authorized the transfer.",
       "The treasury wallet had been holding funds for an upcoming project launch. Minutes after the transfer, the receiving wallet moved the funds again.",
       "Someone is moving the money. Your job is to {{find out where it went.}}",
@@ -57,28 +63,6 @@ const cases: Record<string, CaseBrief> = {
   },
 };
 
-export const caseIds = Object.keys(cases);
-
-/** The case file the player reviews after accepting, before the investigation starts. */
-export const caseFileSchema = z.object({
-  id: z.string(),
-  number: z.string(),
-  codename: z.string(),
-  difficulty: z.string(),
-  status: z.enum(["open", "solved", "closed"]),
-  /** Paragraphs, with the same `{{…}}` highlight markup as the brief. */
-  briefing: z.array(z.string()),
-  knownInformation: z.object({
-    /** Shortened address for display. Solana addresses are case-sensitive: never re-case them. */
-    initialWallet: z.string(),
-    missingAmount: z.string(),
-    approximateTime: z.string(),
-  }),
-  objectives: z.array(z.string()),
-});
-
-export type CaseFile = z.infer<typeof caseFileSchema>;
-
 /** MOCK case files until the backend serves them. Values copied from the design. */
 const caseFiles: Record<string, CaseFile> = {
   "case-001": {
@@ -88,12 +72,12 @@ const caseFiles: Record<string, CaseFile> = {
     difficulty: "Rookie",
     status: "open",
     briefing: [
-      "At {{02:43 UTC}}, 20 SOL disappeared from a project's treasury wallet.",
+      "At {{02:43\u00a0UTC}}, 20 SOL disappeared from a project's treasury wallet.",
       "The funds were moved through several wallets.",
       "Your task is to determine where the money went and identify the trail that connects the wallets.",
     ],
     knownInformation: {
-      initialWallet: "7XH3 . . . 92KD",
+      initialWallet: "7XH3\u00a0.\u00a0.\u00a0.\u00a092KD",
       missingAmount: "20 SOL",
       approximateTime: "02 : 3 MIN",
     },
@@ -133,24 +117,55 @@ const caseFiles: Record<string, CaseFile> = {
   },
 };
 
-/** Retrieve case file from backend serverApi or fallback to known case files. */
+/** Fetch case brief from backend with fallback to mock cases. */
+export async function getCaseBrief(caseId: string): Promise<CaseBrief | null> {
+  try {
+    const brief = await getCaseBriefApi(caseId);
+    if (brief) return brief;
+  } catch (error) {
+    if (error instanceof z.ZodError) throw error;
+  }
+  const found = cases[caseId];
+  return found ? caseBriefSchema.parse(found) : null;
+}
+
+/** Fetch case file from backend with fallback to mock case files. */
 export async function getCaseFile(caseId: string): Promise<CaseFile | null> {
   try {
-    const { serverApi } = await import("@/lib/api/server");
-    return await serverApi.get(`/cases/${caseId}/file`, caseFileSchema);
+    const file = await getCaseFileApi(caseId);
+    if (file) return file;
+  } catch (error) {
+    if (error instanceof z.ZodError) throw error;
+  }
+  const found = caseFiles[caseId];
+  return found ? caseFileSchema.parse(found) : null;
+}
+
+/** List all available cases from backend with fallback. */
+export async function listCases(): Promise<CaseCatalogItem[]> {
+  try {
+    return await listCasesApi();
   } catch {
-    const found = caseFiles[caseId];
-    return found ? caseFileSchema.parse(found) : null;
+    return [
+      {
+        id: "case-001",
+        number: "Case 001",
+        title: "Trace the missing 20 SOL",
+        codename: "The Missing Treasury",
+        difficulty: "Rookie",
+        status: "open",
+      },
+      {
+        id: "case-002",
+        number: "Case 002",
+        title: "The 120,000 wETH Wormhole Bridge Exploit",
+        codename: "Operation Secp256k1 Bypass",
+        difficulty: "Veteran",
+        status: "open",
+      },
+    ];
   }
 }
 
-/** Retrieve case brief from backend serverApi or fallback to known cases. */
-export async function getCaseBrief(caseId: string): Promise<CaseBrief | null> {
-  try {
-    const { serverApi } = await import("@/lib/api/server");
-    return await serverApi.get(`/cases/${caseId}`, caseBriefSchema);
-  } catch {
-    const found = cases[caseId];
-    return found ? caseBriefSchema.parse(found) : null;
-  }
-}
+/** Known case IDs for static generation. */
+export const caseIds: string[] = ["case-001", "case-002"];

@@ -2,6 +2,7 @@
 
 import { Check, Copy } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils/cn";
 
@@ -32,8 +33,10 @@ export function CopyButton({
         try {
           await navigator.clipboard.writeText(value);
           setCopied(true);
+          toast.success("Copied to clipboard", { id: "copied" });
         } catch {
-          // Clipboard blocked (insecure context or permissions): nothing to confirm.
+          // Clipboard blocked (insecure context or permissions).
+          toast.error("Couldn't copy", { description: "Select the text and copy it manually." });
         }
       }}
       className={cn(

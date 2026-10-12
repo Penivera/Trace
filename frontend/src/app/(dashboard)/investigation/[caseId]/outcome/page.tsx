@@ -3,15 +3,12 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { TraceLoader } from "@/components/feedback/trace-loader";
 import { CaseSolved } from "@/features/investigation/components/case-solved";
-import { getCaseOutcome, outcomeCaseIds } from "@/features/investigation/outcome";
+import { getCaseOutcome } from "@/features/investigation/outcome";
 import { getSelectedInvestigator } from "@/features/investigators/selection";
 
 type Props = PageProps<"/investigation/[caseId]/outcome">;
-
-export function generateStaticParams() {
-  return outcomeCaseIds.map((caseId) => ({ caseId }));
-}
 
 export const metadata: Metadata = {
   title: "Case solved",
@@ -75,7 +72,7 @@ async function OutcomeContent({ params }: Pick<Props, "params">) {
 
 export default function OutcomePage(props: Props) {
   return (
-    <Suspense fallback={<div className="min-h-screen" />}>
+    <Suspense fallback={<TraceLoader label="Tallying the evidence" />}>
       <OutcomeContent params={props.params} />
     </Suspense>
   );

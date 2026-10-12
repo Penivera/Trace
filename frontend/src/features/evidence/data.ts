@@ -1,21 +1,24 @@
+import "server-only";
+
 import { z } from "zod";
 
-/**
- * The final question of a case. Only the *choices* live here: which option is
- * correct must stay on the server (anything sent to the browser is readable).
- */
-const evidencePromptSchema = z.object({
-  caseId: z.string(),
-  /** Trail wallet ids the player can pick as the final destination. */
-  destinationWalletIds: z.array(z.string()).min(2),
-  scenarios: z.array(z.object({ id: z.string(), label: z.string() })).min(2),
-  theoryPlaceholder: z.string(),
-});
+import {
+  evidencePromptSchema,
+  caseOutcomeSchema,
+  type EvidencePrompt,
+  type CaseOutcome,
+  THEORY_MIN_LENGTH,
+  THEORY_MAX_LENGTH,
+} from "@/features/api/schemas";
 
-export type EvidencePrompt = z.infer<typeof evidencePromptSchema>;
+import {
+  getEvidencePrompt as getEvidencePromptApi,
+  submitCaseTheory as submitCaseTheoryApi,
+  getCaseOutcome as getCaseOutcomeApi,
+} from "./server-api";
 
-export const THEORY_MIN_LENGTH = 20;
-export const THEORY_MAX_LENGTH = 2000;
+export { evidencePromptSchema, caseOutcomeSchema, THEORY_MIN_LENGTH, THEORY_MAX_LENGTH };
+export type { EvidencePrompt, CaseOutcome };
 
 /** MOCK prompts by case, copied from the design. */
 const prompts: Record<string, EvidencePrompt> = {
@@ -33,17 +36,7 @@ const prompts: Record<string, EvidencePrompt> = {
   },
 };
 
-export const evidenceCaseIds = Object.keys(prompts);
-
-export async function getEvidencePrompt(caseId: string): Promise<EvidencePrompt | null> {
-  try {
-    const { serverApi } = await import("@/lib/api/server");
-    return await serverApi.get(`/cases/${caseId}/evidence-prompt`, evidencePromptSchema);
-  } catch {
-    const found = prompts[caseId];
-    return found ? evidencePromptSchema.parse(found) : null;
-  }
-}
+export const evidenceCaseIds: string[] = Object.keys(prompts);
 
 /**
  * Validates a submission against the case's own choices, so a tampered form
@@ -73,3 +66,36 @@ export type EvidenceFormState =
       values: { destination?: string; scenario?: string; theory?: string };
     }
   | { status: "received"; message: string };
+
+/** Fetch evidence prompt from backend with fallback to mock prompts. */
+export async function getEvidencePrompt(caseId: string): Promise<EvidencePrompt | null> {
+  try {
+    const prompt = await getEvidencePromptApi(caseId);
+    if (prompt) return prompt;
+  } catch (error) {
+    if (error instanceof z.ZodError) throw error;
+  }
+  const found = prompts[caseId];
+  return found ? evidencePromptSchema.parse(found) : null;
+}
+
+/** Submit case theory to backend. */
+export async function submitCaseTheory(
+  caseId: string,
+  values: z.infer<ReturnType<typeof evidenceSubmissionSchema>>,
+): Promise<CaseOutcome> {
+  return submitCaseTheoryApi(caseId, values);
+}
+
+/** Fetch case outcome from backend. */
+export async function getCaseOutcome(caseId: string): Promise<CaseOutcome | null> {
+  try {
+    return await getCaseOutcomeApi(caseId);
+  } catch (error) {
+    if (error instanceof z.ZodError) throw error;
+    if (error instanceof Error && error.name === "ApiError" && error.message.includes("404")) {
+      return null;
+    }
+    return null;
+  }
+}

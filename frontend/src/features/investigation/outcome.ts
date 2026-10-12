@@ -1,19 +1,11 @@
+import "server-only";
+
 import { z } from "zod";
+import { caseOutcomeSchema, type CaseOutcome } from "@/features/api/schemas";
+import { getCaseOutcome as getCaseOutcomeEvidence } from "@/features/evidence/data";
 
-/** The scored result of a finished case. Computed by the backend, never in the browser. */
-const caseOutcomeSchema = z.object({
-  caseId: z.string(),
-  title: z.string(),
-  summary: z.string(),
-  score: z.number().int().nonnegative(),
-  maxScore: z.number().int().positive(),
-  clues: z.object({ found: z.number().int(), total: z.number().int() }),
-  evidenceCollected: z.number().int().nonnegative(),
-  traces: z.object({ correct: z.number().int(), total: z.number().int() }),
-  hintsUsed: z.number().int().nonnegative(),
-});
-
-export type CaseOutcome = z.infer<typeof caseOutcomeSchema>;
+export { caseOutcomeSchema };
+export type { CaseOutcome };
 
 /** MOCK outcomes, values from the Figma "Case solved" screen. */
 const outcomes: Record<string, CaseOutcome> = {
@@ -34,10 +26,11 @@ export const outcomeCaseIds = Object.keys(outcomes);
 
 export async function getCaseOutcome(caseId: string): Promise<CaseOutcome | null> {
   try {
-    const { serverApi } = await import("@/lib/api/server");
-    return await serverApi.get(`/cases/${caseId}/outcome`, caseOutcomeSchema);
-  } catch {
-    const found = outcomes[caseId];
-    return found ? caseOutcomeSchema.parse(found) : null;
+    const outcome = await getCaseOutcomeEvidence(caseId);
+    if (outcome) return outcome;
+  } catch (error) {
+    if (error instanceof z.ZodError) throw error;
   }
+  const found = outcomes[caseId];
+  return found ? caseOutcomeSchema.parse(found) : null;
 }

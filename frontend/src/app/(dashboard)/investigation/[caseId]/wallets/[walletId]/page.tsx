@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { TraceLoader } from "@/components/feedback/trace-loader";
 import { caseRoutes } from "@/features/cases/routes";
 import { WalletDetail } from "@/features/investigation/components/wallet-detail";
 import { getWalletDetail, getWorkspace, walletParams } from "@/features/investigation/data";
@@ -64,7 +65,7 @@ async function WalletContent({ params }: Pick<Props, "params">) {
           receivedFrom={neighbor(wallet.receivedFromWalletId)}
           sentTo={neighbor(wallet.sentToWalletId)}
           targetHref={(target) => caseRoutes.target(caseId, target)}
-          evidenceHref={caseRoutes.evidence(caseId)}
+          caseId={caseId}
         />
       </div>
     </div>
@@ -73,7 +74,7 @@ async function WalletContent({ params }: Pick<Props, "params">) {
 
 export default function WalletPage(props: Props) {
   return (
-    <Suspense fallback={<div className="min-h-screen" />}>
+    <Suspense fallback={<TraceLoader label="Pulling up the wallet" />}>
       <WalletContent {...props} />
     </Suspense>
   );

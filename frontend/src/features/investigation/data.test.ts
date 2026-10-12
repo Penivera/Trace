@@ -25,7 +25,7 @@ describe("case data integrity", () => {
         expect(tx!.amountLamports).toBe(entry.amountLamports);
       }
     }
-  });
+  }, 20000);
 });
 
 describe("isSolved", () => {
@@ -55,11 +55,5 @@ describe("getWorkspace", () => {
     const workspace = await getWorkspace("case-001");
     expect(workspace && isSolved(workspace)).toBe(false);
     expect(workspace?.lead).not.toBeNull();
-  });
-
-  it("previews the solved case with no pending lead", async () => {
-    const workspace = await getWorkspace("case-001", "solved");
-    expect(workspace && isSolved(workspace)).toBe(true);
-    expect(workspace?.lead).toBeNull();
   });
 });

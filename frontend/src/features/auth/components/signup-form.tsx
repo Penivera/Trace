@@ -1,19 +1,22 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Field, fieldErrorId } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 
-import { signup } from "../api";
+import { signupAction } from "../actions";
 import { PASSWORD_MIN_LENGTH, signupSchema } from "../schemas";
 import { FormAlert } from "@/components/ui/form-alert";
-import { SocialSignIn } from "./social-sign-in";
+import { oauthProviderName, SocialSignIn } from "./social-sign-in";
 
 export function SignupForm() {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -27,8 +30,15 @@ export function SignupForm() {
 
   const onSubmit = handleSubmit(async (values) => {
     try {
-      await signup(values);
-      // TODO: redirect once the session flow is defined with the backend.
+      const result = await signupAction(values);
+      if ("error" in result) {
+        setError("root", { message: result.error });
+        return;
+      }
+      toast.success(`Welcome, ${result.displayName.split(" ")[0]}`, {
+        description: "Your case files are ready.",
+      });
+      router.replace(result.redirectTo);
     } catch (error) {
       setError("root", {
         message: error instanceof Error ? error.message : "Something went wrong. Try again.",
@@ -93,7 +103,12 @@ export function SignupForm() {
 
       <SocialSignIn
         label="Sign up with"
-        onUnavailable={(message) => setError("root", { message })}
+        // TODO: start the OAuth redirect once the backend exposes it.
+        onContinue={(provider) =>
+          toast.info(`${oauthProviderName[provider]} sign-in is coming soon`, {
+            description: "Use email and password sign-in for now.",
+          })
+        }
       />
     </form>
   );
