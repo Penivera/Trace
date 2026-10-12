@@ -161,7 +161,7 @@ class EvidenceRecord(SQLModel, table=True):
     __tablename__ = "evidence"
 
     id: str = Field(
-        default_factory=lambda: str(uuid.uuid4()),
+        default_factory=lambda: f"evidence-{uuid.uuid4().hex[:8]}",
         primary_key=True,
         index=True,
     )
@@ -178,12 +178,9 @@ class EvidenceRecord(SQLModel, table=True):
     def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
-            "caseId": self.case_id,
             "kind": self.kind,
             "targetId": self.target_id,
             "label": self.label,
-            "notes": self.notes,
-            "createdAt": self.created_at.isoformat(),
         }
 
 

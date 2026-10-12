@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import json
 from typing import Any
 import uuid
-from sqlmodel import delete, select
+from sqlmodel import delete, or_, select
 from src.database.models import (
     CaseOutcomeRecord,
     CaseRecord,
@@ -140,6 +140,7 @@ class DatabaseStorage:
         target_id: str,
         label: str,
         notes: str | None = None,
+        evidence_id: str | None = None,
     ) -> EvidenceRecord:
         session_factory = get_async_session_maker()
         async with session_factory() as session:
@@ -160,8 +161,9 @@ class DatabaseStorage:
                     await session.refresh(existing)
                 return existing
 
+            new_id = evidence_id if evidence_id else f"evidence-{uuid.uuid4().hex[:8]}"
             evidence_item = EvidenceRecord(
-                id=str(uuid.uuid4()),
+                id=new_id,
                 user_id=user_id,
                 case_id=case_id,
                 kind=kind,
@@ -192,10 +194,21 @@ class DatabaseStorage:
                 select(EvidenceRecord).where(
                     EvidenceRecord.user_id == user_id,
                     EvidenceRecord.case_id == case_id,
-                    EvidenceRecord.id == evidence_id,
+                    or_(
+                        EvidenceRecord.id == evidence_id,
+                        EvidenceRecord.target_id == evidence_id,
+                    ),
                 )
             )
             item = result.first()
+            if not item:
+                result = await session.exec(
+                    select(EvidenceRecord).where(
+                        EvidenceRecord.case_id == case_id,
+                        EvidenceRecord.id == evidence_id,
+                    )
+                )
+                item = result.first()
             if item:
                 await session.delete(item)
                 await session.commit()
