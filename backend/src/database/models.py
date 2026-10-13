@@ -31,6 +31,17 @@ class UserRecord(SQLModel, table=True):
         default=None,
         nullable=True,
     )
+    x_id: str | None = Field(
+        default=None,
+        unique=True,
+        index=True,
+        nullable=True,
+    )
+    x_username: str | None = Field(
+        default=None,
+        index=True,
+        nullable=True,
+    )
     selected_investigator_id: str = Field(
         default="tracy",
     )
@@ -54,6 +65,8 @@ class UserRecord(SQLModel, table=True):
             "email": self.email,
             "username": self.username,
             "walletAddress": self.wallet_address,
+            "xId": self.x_id,
+            "xUsername": self.x_username,
             "selectedInvestigatorId": self.selected_investigator_id,
             "role": self.role,
             "isAdmin": self.is_admin,

@@ -24,6 +24,8 @@ class DatabaseStorage:
         username: str | None = None,
         wallet_address: str | None = None,
         password_hash: str | None = None,
+        x_id: str | None = None,
+        x_username: str | None = None,
         selected_investigator_id: str = "tracy",
         role: str = "player",
         is_admin: bool = False,
@@ -31,6 +33,10 @@ class DatabaseStorage:
         if not username:
             if wallet_address:
                 username = f"Agent_{wallet_address[:4]}..{wallet_address[-4:]}"
+            elif x_username:
+                username = x_username
+            elif x_id:
+                username = f"Agent_{x_id[:6]}"
             else:
                 username = "Agent"
 
@@ -40,6 +46,8 @@ class DatabaseStorage:
             username=username,
             wallet_address=wallet_address,
             password_hash=password_hash,
+            x_id=x_id,
+            x_username=x_username,
             selected_investigator_id=selected_investigator_id,
             role=role,
             is_admin=is_admin,
@@ -49,6 +57,28 @@ class DatabaseStorage:
             session.add(user)
             await session.commit()
             await session.refresh(user)
+            return user
+
+    async def get_user_by_x_id(self, x_id: str) -> UserRecord | None:
+        session_factory = get_async_session_maker()
+        async with session_factory() as session:
+            result = await session.exec(select(UserRecord).where(UserRecord.x_id == x_id))
+            return result.first()
+
+    async def link_x_account(
+        self, user_id: str, x_id: str, x_username: str | None = None
+    ) -> UserRecord | None:
+        session_factory = get_async_session_maker()
+        async with session_factory() as session:
+            result = await session.exec(select(UserRecord).where(UserRecord.id == user_id))
+            user = result.first()
+            if user:
+                user.x_id = x_id
+                if x_username:
+                    user.x_username = x_username
+                session.add(user)
+                await session.commit()
+                await session.refresh(user)
             return user
 
     async def get_user_by_id(self, user_id: str) -> UserRecord | None:
